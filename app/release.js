@@ -42,23 +42,32 @@ try {
     fs.writeFileSync(appJsonPath, JSON.stringify(appJson, null, 2) + '\n');
     console.log(`🚀 Bumped app.json version: ${currentVersion} -> ${newVersion}`);
 
+    // Get current branch
+    const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+    console.log(`📡 Current branch: ${branch}`);
+
     const commands = [
         `git add app.json CHANGELOG.md`,
         `git commit -m "chore: bump version to v${newVersion}${releaseNotes ? '\n\n' + releaseNotes : ''}"`,
-        `git push origin main`,
+        `git push origin ${branch}`,
         `git tag v${newVersion}`,
         `git push origin v${newVersion}`
     ];
 
     for (const cmd of commands) {
-        console.log(`> ${cmd}`);
-        execSync(cmd, { stdio: 'inherit' });
+        try {
+            console.log(`> ${cmd}`);
+            execSync(cmd, { stdio: 'inherit' });
+        } catch (cmdError) {
+            console.error(`\n❌ Command failed: ${cmd}`);
+            throw cmdError;
+        }
     }
 
     console.log(`\n✅ Successfully released v${newVersion}!`);
     console.log(`\n📋 RELEASE NOTES FOR GITHUB:\n\n${releaseNotes || 'Bug fixes and performance improvements.'}\n`);
 
 } catch (error) {
-    console.error(`\n❌ Release failed: ${error.message}\n`);
+    console.error(`\n❌ Release failed. Please check the logs above.\n`);
     process.exit(1);
 }
