@@ -89,10 +89,13 @@ export default function LoginScreen() {
             >
               Phone Number
             </Text>
-            <View className="relative">
+            <View className="flex-row gap-2">
+              <View className="h-14 bg-surface-container px-4 rounded-xl justify-center border border-outline-variant/20">
+                <Text className="text-on-surface font-body-medium">+880</Text>
+              </View>
               <TextInput
-                className="h-14 bg-surface-container-high rounded-xl px-4 text-on-surface text-base"
-                placeholder="+880 1XXX-XXXXXX"
+                className="flex-1 h-14 bg-surface-container-high rounded-xl px-4 text-on-surface text-base"
+                placeholder="1XXX XXXXXX"
                 placeholderTextColor={Colors.outline}
                 keyboardType="phone-pad"
                 value={phone}
@@ -111,7 +114,7 @@ export default function LoginScreen() {
               >
                 Password
               </Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
                 <Text
                   className="text-[11px] font-label uppercase text-primary"
                   style={{ letterSpacing: 1 }}

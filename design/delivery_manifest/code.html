@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Delivery Manifest | Matir Hari Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#84250b",
+                        "secondary-fixed-dim": "#f6be3b",
+                        "primary": "#902d13",
+                        "surface-tint": "#a53c21",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#b14529",
+                        "surface-dim": "#dbdad6",
+                        "on-tertiary-fixed-variant": "#5d4037",
+                        "on-surface-variant": "#54433c",
+                        "surface-variant": "#e4e2de",
+                        "on-secondary-fixed": "#261900",
+                        "on-primary-container": "#ffe1da",
+                        "surface-container-highest": "#e4e2de",
+                        "background": "#fbf9f5",
+                        "secondary": "#795900",
+                        "secondary-fixed": "#ffdea0",
+                        "on-tertiary-fixed": "#2c160e",
+                        "primary-fixed": "#ffdbd2",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#fbf9f5",
+                        "outline": "#87736b",
+                        "secondary-container": "#fcc340",
+                        "primary-fixed-dim": "#ffb4a2",
+                        "outline-variant": "#dac1b8",
+                        "tertiary-container": "#816056",
+                        "surface-container-low": "#f5f3ef",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#eae8e4",
+                        "surface-container": "#efeeea",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-tertiary-container": "#ffe1d8",
+                        "on-secondary-container": "#6f5100",
+                        "tertiary": "#67483f",
+                        "on-primary-fixed": "#3c0800",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#e7bdb1",
+                        "on-background": "#1b1c1a",
+                        "inverse-on-surface": "#f2f0ed",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface": "#fbf9f5",
+                        "on-surface": "#1b1c1a",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "inverse-surface": "#30312e",
+                        "inverse-primary": "#ffb4a2",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrolled-header {
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-[#fbf9f5] dark:bg-stone-900 z-50">
+<div class="flex flex-col h-full py-8 px-4">
+<div class="mb-10 px-2">
+<h1 class="text-2xl font-bold text-[#902d13] dark:text-[#b14529] font-headline tracking-tight">Matir Hari</h1>
+<p class="text-xs text-stone-500 font-label tracking-widest uppercase mt-1">Artisanal Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-medium">Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-medium">Menus</span>
+</a>
+<!-- Active Tab: Manifest -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#902d13] dark:text-[#fbf9f5] font-bold border-r-4 border-[#902d13] bg-[#f5f3ef] dark:bg-stone-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-medium">Manifest</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant/20">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-stone-600 hover:text-error transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-medium">Sign Out</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar Component -->
+<header class="sticky top-0 w-full z-40 bg-[#fbf9f5]/80 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-[0_12px_32px_rgba(144,45,19,0.04)]">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-stone-400 group-focus-within:text-primary transition-colors">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-6 py-2 text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search manifest..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-stone-500 hover:bg-surface-container-high rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="p-2 text-stone-500 hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-bold text-on-background">Admin User</p>
+<p class="text-[10px] text-stone-500 uppercase tracking-tighter">Kitchen Manager</p>
+</div>
+<img class="w-10 h-10 rounded-full object-cover border-2 border-primary-container/20" data-alt="Close-up professional portrait of a kitchen manager in a clean white chef coat with a friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqL756M8j8JL7ls-W06arFA9DKYxkNT6vvSMLYE9ZnvHrOaemhScT4Lcmb3O2ZC1kzwh16zhCHd3P_fnoww7aQ3LzFZ5sEqcoAc0yhUBU_UidMJSJYKRWB1gdT-Tlzb8qAXP8l7q3sY-_sXUxIplgmtY1TaRGYN2BcERDPZjRvusSdwNHYSHX2EdNm6YTDZcrs4_2fdvYAnLTWfm3zjN6LI0syS-p5jtE8kILOmZtss-eo-ORDl35Awr0W7hTAIVUsJXevnob8iPk"/>
+</div>
+</div>
+</header>
+<!-- Manifest Content Section -->
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+<div>
+<h2 class="text-4xl font-extrabold font-headline text-on-background tracking-tight">Delivery Manifest</h2>
+<div class="flex items-center gap-2 mt-2 text-stone-500">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<p class="text-sm font-medium">Monday, October 23, 2023</p>
+<span class="mx-2">•</span>
+<span class="bg-secondary-container/20 text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Today's Batch</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-low text-on-surface-variant font-semibold hover:bg-surface-container-high transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg">refresh</span>
+                        Refresh
+                    </button>
+<button class="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold shadow-[0_8px_20px_rgba(144,45,19,0.2)] hover:opacity-90 transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg">print</span>
+                        Print Manifest
+                    </button>
+</div>
+</div>
+<!-- Bento-Style Grid for Manifest Items -->
+<div class="grid grid-cols-1 gap-4">
+<!-- Manifest Card Item 1 -->
+<div class="group bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-surface-container-high transition-all duration-300 border border-transparent hover:border-outline-variant/30">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm relative">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<div class="absolute -top-2 -right-2 bg-secondary text-on-secondary text-[10px] font-black px-2 py-1 rounded-lg">LUNCH</div>
+</div>
+</div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Customer</p>
+<h4 class="text-lg font-bold text-on-background leading-tight">Anisur Rahman</h4>
+<p class="text-sm text-stone-500 font-medium">+880 1712-445566</p>
+</div>
+<div class="md:col-span-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Delivery Address</p>
+<p class="text-sm text-on-surface-variant font-medium leading-relaxed">House 42, Road 18, Block D, Banani Residential Area, Dhaka 1213</p>
+</div>
+<div class="flex items-center md:justify-end gap-3">
+<a class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-primary text-sm font-bold border border-outline-variant/20 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">map</span>
+                                Map Link
+                            </a>
+</div>
+</div>
+<div class="flex-shrink-0 pl-6 border-l border-outline-variant/30">
+<label class="flex flex-col items-center gap-2 cursor-pointer">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Rider Handover</span>
+<input class="w-8 h-8 rounded-lg border-2 border-outline-variant text-primary focus:ring-primary/20 cursor-pointer transition-all checked:bg-primary" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Manifest Card Item 2 -->
+<div class="group bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-surface-container-high transition-all duration-300 border border-transparent hover:border-outline-variant/30">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm relative">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">dinner_dining</span>
+<div class="absolute -top-2 -right-2 bg-primary text-on-primary text-[10px] font-black px-2 py-1 rounded-lg">DINNER</div>
+</div>
+</div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Customer</p>
+<h4 class="text-lg font-bold text-on-background leading-tight">Samira Azad</h4>
+<p class="text-sm text-stone-500 font-medium">+880 1819-332211</p>
+</div>
+<div class="md:col-span-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Delivery Address</p>
+<p class="text-sm text-on-surface-variant font-medium leading-relaxed">Flat 4B, Shuvro Tower, Plot 12, Mirpur DOHS, Dhaka 1216</p>
+</div>
+<div class="flex items-center md:justify-end gap-3">
+<a class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-primary text-sm font-bold border border-outline-variant/20 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">map</span>
+                                Map Link
+                            </a>
+</div>
+</div>
+<div class="flex-shrink-0 pl-6 border-l border-outline-variant/30">
+<label class="flex flex-col items-center gap-2 cursor-pointer">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Rider Handover</span>
+<input class="w-8 h-8 rounded-lg border-2 border-outline-variant text-primary focus:ring-primary/20 cursor-pointer transition-all checked:bg-primary" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Manifest Card Item 3 -->
+<div class="group bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-surface-container-high transition-all duration-300 border border-transparent hover:border-outline-variant/30">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm relative">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<div class="absolute -top-2 -right-2 bg-secondary text-on-secondary text-[10px] font-black px-2 py-1 rounded-lg">LUNCH</div>
+</div>
+</div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Customer</p>
+<h4 class="text-lg font-bold text-on-background leading-tight">Mustafa Kamal</h4>
+<p class="text-sm text-stone-500 font-medium">+880 1675-998877</p>
+</div>
+<div class="md:col-span-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Delivery Address</p>
+<p class="text-sm text-on-surface-variant font-medium leading-relaxed">Green Heritage Apts, Suite 201, Dhanmondi 27, Dhaka 1209</p>
+</div>
+<div class="flex items-center md:justify-end gap-3">
+<a class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-primary text-sm font-bold border border-outline-variant/20 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">map</span>
+                                Map Link
+                            </a>
+</div>
+</div>
+<div class="flex-shrink-0 pl-6 border-l border-outline-variant/30">
+<label class="flex flex-col items-center gap-2 cursor-pointer">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Rider Handover</span>
+<input checked="" class="w-8 h-8 rounded-lg border-2 border-outline-variant text-primary focus:ring-primary/20 cursor-pointer transition-all checked:bg-primary" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Manifest Card Item 4 -->
+<div class="group bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-surface-container-high transition-all duration-300 border border-transparent hover:border-outline-variant/30">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm relative">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<div class="absolute -top-2 -right-2 bg-secondary text-on-secondary text-[10px] font-black px-2 py-1 rounded-lg">LUNCH</div>
+</div>
+</div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Customer</p>
+<h4 class="text-lg font-bold text-on-background leading-tight">Farhana Huq</h4>
+<p class="text-sm text-stone-500 font-medium">+880 1554-112233</p>
+</div>
+<div class="md:col-span-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Delivery Address</p>
+<p class="text-sm text-on-surface-variant font-medium leading-relaxed">Level 9, ABC Corporate Suites, Karwan Bazar C/A, Dhaka 1215</p>
+</div>
+<div class="flex items-center md:justify-end gap-3">
+<a class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-primary text-sm font-bold border border-outline-variant/20 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">map</span>
+                                Map Link
+                            </a>
+</div>
+</div>
+<div class="flex-shrink-0 pl-6 border-l border-outline-variant/30">
+<label class="flex flex-col items-center gap-2 cursor-pointer">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Rider Handover</span>
+<input class="w-8 h-8 rounded-lg border-2 border-outline-variant text-primary focus:ring-primary/20 cursor-pointer transition-all checked:bg-primary" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Summary Section / Trust Metric -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/10">
+<h3 class="text-xl font-bold font-headline mb-6">Manifest Insight</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Total Orders</span>
+<span class="text-3xl font-black text-on-background">48</span>
+<p class="text-xs text-stone-500">Across 3 delivery zones</p>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Handed to Rider</span>
+<span class="text-3xl font-black text-secondary">32</span>
+<p class="text-xs text-stone-500">67% completion rate</p>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Pending Prep</span>
+<span class="text-3xl font-black text-primary">05</span>
+<p class="text-xs text-stone-500">Urgent: Dinner batch</p>
+</div>
+</div>
+</div>
+<div class="bg-primary/5 rounded-3xl p-8 border border-primary/10 flex flex-col justify-between">
+<div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary mb-2 block">Authenticity Check</span>
+<h4 class="text-lg font-bold leading-tight mb-4">Pottery Tracking</h4>
+<p class="text-sm text-stone-600 leading-relaxed">Ensure all clay lids are secured with jute twine before handing to riders. Maintain the Matir Hari standard.</p>
+</div>
+<div class="mt-6 flex items-center gap-4">
+<div class="relative w-12 h-12">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-secondary-fixed-dim/20" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-secondary" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="30" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold">92%</span>
+</div>
+<span class="text-xs font-bold text-on-background">Eco-Packaging Goal</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Map View Preview (Decorative Background Image for context) -->
+<div class="hidden lg:block fixed bottom-8 right-8 w-64 h-48 rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+<img class="w-full h-full object-cover" data-alt="Stylized modern map interface with warm terracotta colored markers indicating delivery locations in a city grid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo2CppwK397knlIW4k3m8BVGG676BjxS2jOU0z8QyaWl0-XXcAyhUtzQbUHeIFBiJ14ZQ7Ecl5jxm0q358cX2u5e-FBNFIUUanhbjAND5gt__HB_mm08bbclAPQaIib3-8OT_yLVaAR5NL705tc1HSO7FDf0ID_mbKlfWjEBNXwKhcfcslTXmQZMago0ZOtZwux9UhV6rAXhLLHrGEbme7QTtsP7Fu1wYIdVHXGCFvkyjmuyATfTAZEKi3M6xpBukqjZp6fy7udlA"/>
+<div class="absolute inset-0 bg-primary/10 pointer-events-none"></div>
+<div class="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[10px] font-bold shadow-sm">
+            Route: Zone A - Banani
+        </div>
+</div>
+</body></html>

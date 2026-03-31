@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Matir Hari Admin - Orders</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#84250b",
+              "secondary-fixed-dim": "#f6be3b",
+              "primary": "#902d13",
+              "surface-tint": "#a53c21",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#b14529",
+              "surface-dim": "#dbdad6",
+              "on-tertiary-fixed-variant": "#5d4037",
+              "on-surface-variant": "#54433c",
+              "surface-variant": "#e4e2de",
+              "on-secondary-fixed": "#261900",
+              "on-primary-container": "#ffe1da",
+              "surface-container-highest": "#e4e2de",
+              "background": "#fbf9f5",
+              "secondary": "#795900",
+              "secondary-fixed": "#ffdea0",
+              "on-tertiary-fixed": "#2c160e",
+              "primary-fixed": "#ffdbd2",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#fbf9f5",
+              "outline": "#87736b",
+              "secondary-container": "#fcc340",
+              "primary-fixed-dim": "#ffb4a2",
+              "outline-variant": "#dac1b8",
+              "tertiary-container": "#816056",
+              "surface-container-low": "#f5f3ef",
+              "on-error": "#ffffff",
+              "surface-container-high": "#eae8e4",
+              "surface-container": "#efeeea",
+              "tertiary-fixed": "#ffdbd0",
+              "on-tertiary-container": "#ffe1d8",
+              "on-secondary-container": "#6f5100",
+              "tertiary": "#67483f",
+              "on-primary-fixed": "#3c0800",
+              "on-primary": "#ffffff",
+              "tertiary-fixed-dim": "#e7bdb1",
+              "on-background": "#1b1c1a",
+              "inverse-on-surface": "#f2f0ed",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "surface": "#fbf9f5",
+              "on-surface": "#1b1c1a",
+              "error-container": "#ffdad6",
+              "on-secondary-fixed-variant": "#5c4300",
+              "inverse-surface": "#30312e",
+              "inverse-primary": "#ffb4a2",
+              "error": "#ba1a1a"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-[#fbf9f5] dark:bg-stone-900 z-50">
+<div class="flex flex-col h-full py-8 px-4 font-['Plus_Jakarta_Sans'] tracking-tight">
+<div class="mb-10 px-2">
+<h1 class="text-2xl font-bold text-[#902d13] dark:text-[#b14529]">Matir Hari</h1>
+<p class="text-xs text-on-surface-variant/70 uppercase tracking-widest mt-1">Artisanal Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-active:scale-95 duration-150">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<!-- Active Tab: Orders -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#902d13] dark:text-[#fbf9f5] font-bold border-r-4 border-[#902d13] bg-[#f5f3ef] dark:bg-stone-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span>Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-active:scale-95 duration-150">restaurant_menu</span>
+<span class="font-medium">Menus</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-active:scale-95 duration-150">assignment</span>
+<span class="font-medium">Manifest</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant/20 pt-6">
+<div class="flex items-center gap-3 px-4 mb-6">
+<div class="w-10 h-10 rounded-full bg-primary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Admin profile headshot of a mature professional man with a welcoming smile in a warm lit office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8FqRkxfUN_Dlv8sfIdUxF7ugOe3iuknwvy56DGp4rIRwCcsg747Ki4GBRPzlqb-xPNDmltLE20lLQhZrUV_G98w8YNiByz_N2yCmLTHLXzoIKasfwGkInBMCMsxsFLVa8Qq_6JEwwHPwx5o_vRjCcn8UupP3De1EyYAjfOM1VTjYfdDm_XXuXmptiTn1GSuY8BFJk1ZLnZ6ZkIK17zsBy84yJ0fFjYnf3NHilI3ZhQ48AjaEY8p6wTUZMhCmC8oQlXSqsJwlo32E"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Admin Profile</p>
+<p class="text-[10px] text-on-surface-variant">Super Admin</p>
+</div>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-600 dark:text-stone-400 hover:text-error transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-medium">Sign Out</span>
+</a>
+</div>
+</div>
+</aside>
+<main class="ml-64 flex-1 flex flex-col">
+<!-- TopNavBar Component -->
+<header class="sticky top-0 w-full z-40 bg-[#fbf9f5]/80 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-[0_12px_32px_rgba(144,45,19,0.04)] font-['Plus_Jakarta_Sans'] font-medium">
+<div class="flex items-center gap-6 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-12 pr-4 py-2.5 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/20 text-sm" placeholder="Search Order ID, Name or TrxID..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-[#902d13] hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-[#902d13] hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Admin Portal</span>
+</div>
+</header>
+<!-- Content Canvas -->
+<section class="p-8 space-y-8 max-w-7xl mx-auto w-full">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-4xl font-extrabold text-on-surface tracking-tight">Orders</h2>
+<p class="text-on-surface-variant mt-1">Manage and verify artisanal meal deliveries.</p>
+</div>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all font-semibold text-sm">
+<span class="material-symbols-outlined text-lg">refresh</span>
+                    Refresh Orders
+                </button>
+</div>
+<!-- Filter Bar -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
+<button class="px-5 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold whitespace-nowrap shadow-md shadow-primary/10">All Orders</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm font-medium whitespace-nowrap">Pending Payment</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm font-medium whitespace-nowrap">Confirmed</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm font-medium whitespace-nowrap">Cooking</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm font-medium whitespace-nowrap">Out for Delivery</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm font-medium whitespace-nowrap">Delivered</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm font-medium whitespace-nowrap">Cancelled</button>
+<button class="px-5 py-2 rounded-full bg-secondary-container/20 text-on-secondary-container border border-secondary-container/30 text-sm font-bold whitespace-nowrap">Admin Queue</button>
+</div>
+<!-- Orders Table Container -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_12px_32px_rgba(144,45,19,0.02)]">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant/10">
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant">Order ID</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant">Customer</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant">Meal Set</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant">Payment Status</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<!-- Order Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-6 py-5">
+<span class="font-headline font-bold text-primary">#MH-8821</span>
+<p class="text-[10px] text-on-surface-variant mt-0.5">Today, 10:45 AM</p>
+</td>
+<td class="px-6 py-5">
+<p class="font-bold text-on-surface">Tanvir Ahmed</p>
+<p class="text-xs text-on-surface-variant">+880 1712-345678</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Traditional Bengali fish curry served in a rustic clay bowl with steam rising and vibrant spices" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAI3j2XDqqycHWjtkONcxZujuFxh8SUIj1iaqxExHHqqlV3gwhM6vPcY8I1WggfjrD72bBhEoxhmcTTEPcg36vFOiBBxXZtt2lBgEbyTiPz0dhJP9b4pXFc7CMF9kMIxrw5BVMCmA3KpFy21svdLv06JwNEM7pIAMMfk_BqEEzYw2FzXoWI0E4-1iiTKhfy0UeNKLUGBleDQf7fqVlOfOGnQ81WAZRvwNm5cWonrIOp0sFPMsMc0kZzJ1YSvzXlzgcuE0nldatJzv8"/>
+</div>
+<div>
+<p class="text-sm font-bold">Ilish Paturi Set</p>
+<p class="text-[10px] text-on-surface-variant">Qty: 2 • ৳1,240</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                                        WAITING VERIFICATION
+                                    </span>
+<code class="text-[10px] font-mono bg-surface-container-high px-2 py-0.5 rounded text-primary border border-outline-variant/20 w-fit">TrxID: BK9XJ3L2P0</code>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Verify Payment">
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+<button class="p-2 text-error hover:bg-error/5 rounded-lg transition-colors" title="Reject Payment">
+<span class="material-symbols-outlined">cancel</span>
+</button>
+<button class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-tighter bg-surface-container-high text-on-surface rounded-lg hover:bg-surface-container-highest transition-colors">
+                                        Update
+                                    </button>
+</div>
+</td>
+</tr>
+<!-- Order Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-6 py-5">
+<span class="font-headline font-bold text-primary">#MH-8819</span>
+<p class="text-[10px] text-on-surface-variant mt-0.5">Today, 09:12 AM</p>
+</td>
+<td class="px-6 py-5">
+<p class="font-bold text-on-surface">Sadia Rahman</p>
+<p class="text-xs text-on-surface-variant">+880 1823-998877</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Warm lentil soup with tempering of dried red chilies and cumin in an earthen pot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAOEM-r7ix82FDbeKVhhYHf7xLvXvcPJUE05RYRAnacJ5XNmarmbuKCTwqZKP-mk8upCk18ywpT-A22TdeWTyVBOnw50zW8Dt-9zjUKahCjn2nzShxkpS04ThWmP3TqKkDETPavcn6XgnP_B8WPEl--Dboeacof_u-m6eJWdIEVqJjJiXdVqYzA0X8ax8kdCE5P8YhDA3JBfbsDDXrOngqd6QQyLtid-VjikU2EB-PKpsxdd4a8k9YGonz4eVNwSL-F9W18D1t8hQ"/>
+</div>
+<div>
+<p class="text-sm font-bold">Rustic Dal &amp; Bhorta</p>
+<p class="text-[10px] text-on-surface-variant">Qty: 1 • ৳450</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-800 text-[10px] font-bold w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-green-600"></span>
+                                        PAID (BKASH)
+                                    </span>
+<code class="text-[10px] font-mono text-on-surface-variant/60 w-fit">TrxID: MZ7YQ4A9K1</code>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-tighter bg-primary text-on-primary rounded-lg shadow-sm">
+                                        Mark Cooking
+                                    </button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Order Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-6 py-5">
+<span class="font-headline font-bold text-primary">#MH-8815</span>
+<p class="text-[10px] text-on-surface-variant mt-0.5">Yesterday, 08:30 PM</p>
+</td>
+<td class="px-6 py-5">
+<p class="font-bold text-on-surface">Ziaur Karim</p>
+<p class="text-xs text-on-surface-variant">+880 1911-002233</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Slow-cooked beef bhuna with thick rich gravy served on a large brass plate with steamed rice" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTdaqM2XDsUaKAbPxiG_v7ooDGtymxOKzSvp5HeUCdWgD4LGJmEbhaCFVayMhNHLAdCFPm3XNyw6LdPZfOgufFuz7DsP8E50PYiz7i_0G17q8Ixs5ECzfvGnTJ88yaG82PACMxBii43Pq5qyqfL23NfvUVqyIKIa2eQ5QD1KxWzH7h-L8-WR4oE8K9UbdXTS6GEmx00hxfyqUznTTeQpGujnc_LTa9ZeMoJ45RaQF3xuZXL30fn54RILIT23cQa0CfTwVtXzuU--I"/>
+</div>
+<div>
+<p class="text-sm font-bold">Smoked Beef Bhuna</p>
+<p class="text-[10px] text-on-surface-variant">Qty: 4 • ৳2,800</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-bold w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span>
+                                        CASH ON DELIVERY
+                                    </span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-tighter bg-surface-container-high text-on-surface rounded-lg opacity-50 cursor-not-allowed">
+                                        Delivered
+                                    </button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+<span class="material-symbols-outlined">print</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Empty State (Hidden for now, shown via logic in a real app) -->
+<div class="hidden flex-col items-center justify-center py-24 px-8 bg-surface-container-low/50 rounded-3xl border-2 border-dashed border-outline-variant/30 text-center">
+<div class="w-24 h-24 mb-6 relative">
+<div class="absolute inset-0 bg-primary/5 rounded-full animate-ping"></div>
+<div class="relative flex items-center justify-center w-full h-full bg-surface-container-lowest rounded-full shadow-lg">
+<span class="material-symbols-outlined text-5xl text-primary/30">restaurant</span>
+</div>
+</div>
+<h3 class="text-2xl font-bold text-on-surface">The Hearth is Quiet</h3>
+<p class="text-on-surface-variant max-w-sm mt-2">No orders have been placed yet. Your artisanal kitchen is ready for its next masterpiece.</p>
+<button class="mt-8 px-8 py-3 bg-primary text-on-primary rounded-xl font-bold hover:scale-105 transition-transform">
+                    Create Manual Order
+                </button>
+</div>
+<!-- Dashboard Stats Bento Snippet -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+<div class="bg-primary p-6 rounded-2xl text-on-primary shadow-lg shadow-primary/10">
+<p class="text-[10px] uppercase tracking-widest font-bold opacity-80">Pending Verification</p>
+<div class="flex items-end justify-between mt-2">
+<span class="text-3xl font-extrabold">12</span>
+<span class="material-symbols-outlined opacity-50 text-4xl">payments</span>
+</div>
+</div>
+<div class="bg-secondary p-6 rounded-2xl text-on-secondary shadow-lg shadow-secondary/10">
+<p class="text-[10px] uppercase tracking-widest font-bold opacity-80">Cooking Now</p>
+<div class="flex items-end justify-between mt-2">
+<span class="text-3xl font-extrabold">08</span>
+<span class="material-symbols-outlined opacity-50 text-4xl">skillet</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/10">
+<p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Daily Revenue</p>
+<div class="flex items-end justify-between mt-2">
+<span class="text-3xl font-extrabold text-on-surface">৳14,250</span>
+<span class="material-symbols-outlined text-primary text-4xl">trending_up</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/10">
+<p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Success Rate</p>
+<div class="flex items-end justify-between mt-2">
+<span class="text-3xl font-extrabold text-on-surface">98.2%</span>
+<div class="w-10 h-10">
+<svg class="w-full h-full text-secondary" viewbox="0 0 36 36">
+<path class="stroke-current opacity-20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
+<path class="stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="98, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

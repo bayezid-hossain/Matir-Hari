@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#84250b",
+              "secondary-fixed-dim": "#f6be3b",
+              "primary": "#902d13",
+              "surface-tint": "#a53c21",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#b14529",
+              "surface-dim": "#dbdad6",
+              "on-tertiary-fixed-variant": "#5d4037",
+              "on-surface-variant": "#54433c",
+              "surface-variant": "#e4e2de",
+              "on-secondary-fixed": "#261900",
+              "on-primary-container": "#ffe1da",
+              "surface-container-highest": "#e4e2de",
+              "background": "#fbf9f5",
+              "secondary": "#795900",
+              "secondary-fixed": "#ffdea0",
+              "on-tertiary-fixed": "#2c160e",
+              "primary-fixed": "#ffdbd2",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#fbf9f5",
+              "outline": "#87736b",
+              "secondary-container": "#fcc340",
+              "primary-fixed-dim": "#ffb4a2",
+              "outline-variant": "#dac1b8",
+              "tertiary-container": "#816056",
+              "surface-container-low": "#f5f3ef",
+              "on-error": "#ffffff",
+              "surface-container-high": "#eae8e4",
+              "surface-container": "#efeeea",
+              "tertiary-fixed": "#ffdbd0",
+              "on-tertiary-container": "#ffe1d8",
+              "on-secondary-container": "#6f5100",
+              "tertiary": "#67483f",
+              "on-primary-fixed": "#3c0800",
+              "on-primary": "#ffffff",
+              "tertiary-fixed-dim": "#e7bdb1",
+              "on-background": "#1b1c1a",
+              "inverse-on-surface": "#f2f0ed",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "surface": "#fbf9f5",
+              "on-surface": "#1b1c1a",
+              "error-container": "#ffdad6",
+              "on-secondary-fixed-variant": "#5c4300",
+              "inverse-surface": "#30312e",
+              "inverse-primary": "#ffb4a2",
+              "error": "#ba1a1a"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-[#fbf9f5] dark:bg-stone-900 z-50">
+<div class="flex flex-col h-full py-8 px-4 font-['Plus_Jakarta_Sans'] tracking-tight">
+<!-- Brand Identity -->
+<div class="mb-10 px-2">
+<h1 class="text-2xl font-bold text-[#902d13] dark:text-[#b14529]">Matir Hari</h1>
+<p class="text-xs text-stone-500 uppercase tracking-widest mt-1">Artisanal Admin Portal</p>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#902d13] dark:text-[#fbf9f5] font-bold border-r-4 border-[#902d13] bg-[#f5f3ef] dark:bg-stone-800 scale-95 duration-150 ease-in-out transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] dark:hover:bg-stone-700 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span>Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] dark:hover:bg-stone-700 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span>Menus</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-stone-600 dark:text-stone-400 hover:text-[#902d13] hover:bg-[#e4e2de] dark:hover:bg-stone-700 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span>Manifest</span>
+</a>
+</nav>
+<!-- Footer Action -->
+<div class="pt-4 mt-auto border-t border-[#f5f3ef] dark:border-stone-800">
+<button class="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-stone-600 dark:text-stone-400 hover:text-error hover:bg-[#e4e2de] dark:hover:bg-stone-700 transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Sign Out</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- TopNavBar Component -->
+<header class="sticky top-0 z-40 bg-[#fbf9f5]/80 dark:bg-stone-900/80 backdrop-blur-xl flex justify-between items-center ml-64 px-8 h-20 w-[calc(100%-16rem)] shadow-[0_12px_32px_rgba(144,45,19,0.04)] font-['Plus_Jakarta_Sans'] font-medium">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/20 text-sm placeholder:text-stone-400" placeholder="Search orders, menus, or manifest..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="relative text-stone-500 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full border-2 border-[#fbf9f5]"></span>
+</button>
+<button class="text-stone-500 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="h-10 w-px bg-surface-container"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-bold text-on-surface">Administrator</p>
+<p class="text-[10px] text-stone-500">Matir Hari Portal</p>
+</div>
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/10" data-alt="close-up portrait of professional restaurant administrator in a clean minimalist office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTI55ojKF_1Ox5XuxG_x7kpu8R5xheeBH3ZAfK3T1OYNFp0GAibTQAuy5S2cv4rTqVaB_xzso_d_OxpbALlWuqdO4CuoBk0_ZcfXmB7gZ9n5G1k2pjB2euk80s6PxSH1ExCJGzn3ip5phtTkYS0-sPNQeWmRF3wnE-HDm-NibBtHHJlhmbLqG2jCPHvSxzSTymR5bya-2YqzNZgtRmp1_LTbnIc-j8t_zVB5TtKOt6WuOvAbEv1hE4XYDvDoqmmzrsBhncoTKIpnU"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 p-8 min-h-[calc(100vh-5rem)]">
+<!-- Header Section -->
+<header class="mb-10">
+<h2 class="text-3xl font-extrabold tracking-tight text-on-surface mb-2">Dashboard Overview</h2>
+<p class="text-stone-500 text-sm">Welcome back. Here is what is happening in the hearth today.</p>
+</header>
+<!-- Bento Grid Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12">
+<!-- Today's Orders -->
+<div class="md:col-span-2 bg-primary rounded-xl p-6 text-on-primary shadow-lg relative overflow-hidden group">
+<div class="relative z-10 flex flex-col h-full justify-between">
+<div>
+<span class="text-[10px] font-bold tracking-[0.1em] uppercase opacity-80">Today's Orders</span>
+<div class="text-5xl font-extrabold mt-2 font-headline">42</div>
+</div>
+<div class="flex items-center gap-2 mt-4 text-sm font-medium opacity-90">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+12% from yesterday</span>
+</div>
+</div>
+<!-- Decorative element -->
+<div class="absolute -right-4 -bottom-4 w-32 h-32 bg-primary-container rounded-full opacity-30 group-hover:scale-110 transition-transform"></div>
+</div>
+<!-- Pending Verification -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-transparent hover:border-outline-variant/20 transition-all">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+</div>
+<div class="text-2xl font-bold font-headline">08</div>
+<p class="text-xs text-stone-500 mt-1 uppercase tracking-tight font-medium">Pending Verification</p>
+</div>
+<!-- Need Admin Action -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-transparent hover:border-outline-variant/20 transition-all">
+<div class="w-10 h-10 rounded-lg bg-error/10 flex items-center justify-center text-error mb-4">
+<span class="material-symbols-outlined" data-icon="report">report</span>
+</div>
+<div class="text-2xl font-bold font-headline">03</div>
+<p class="text-xs text-stone-500 mt-1 uppercase tracking-tight font-medium">Need Admin Action</p>
+</div>
+<!-- Delivered Today -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-transparent hover:border-outline-variant/20 transition-all">
+<div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-700 mb-4">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+</div>
+<div class="text-2xl font-bold font-headline">29</div>
+<p class="text-xs text-stone-500 mt-1 uppercase tracking-tight font-medium">Delivered Today</p>
+</div>
+<!-- Total Customers -->
+<div class="md:col-span-1 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-transparent hover:border-outline-variant/20 transition-all">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary mb-4">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+<div class="text-2xl font-bold font-headline">1,204</div>
+<p class="text-xs text-stone-500 mt-1 uppercase tracking-tight font-medium">Total Customers</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+<!-- Left Column: Quick Actions & Recent -->
+<div class="lg:col-span-2 space-y-10">
+<!-- Quick Actions Section -->
+<section>
+<div class="flex items-center justify-between mb-6 px-1">
+<h3 class="text-xl font-bold tracking-tight text-on-surface">Quick Actions</h3>
+<button class="text-primary text-xs font-bold uppercase tracking-wider hover:underline">Customize</button>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+<button class="flex flex-col items-center justify-center p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-colors text-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-3 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">Verify Payments</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-colors text-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-3 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="queue">queue</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">Admin Queue</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-colors text-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-3 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">Today's Manifest</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-colors text-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-3 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">Confirmed Orders</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-colors text-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-3 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">Edit Menus</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-colors text-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-3 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="all_inbox">all_inbox</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">All Orders</span>
+</button>
+</div>
+</section>
+<!-- Featured Artisanal Entry (Asymmetric Component) -->
+<section class="relative bg-surface-container-low rounded-3xl p-8 overflow-hidden flex flex-col md:flex-row items-center gap-8">
+<div class="flex-1 space-y-4">
+<span class="inline-block px-3 py-1 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold uppercase tracking-widest rounded-full">Spotlight Menu Item</span>
+<h4 class="text-2xl font-bold text-on-surface font-headline">Hand-Fired Smoked Ilish</h4>
+<p class="text-stone-600 text-sm leading-relaxed max-w-md">Our signature dish is trending. 24 orders confirmed for tonight's dinner service. Ensure pottery supplies are replenished.</p>
+<div class="flex items-center gap-4 pt-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-sm font-bold">4.9 Authenticity</span>
+</div>
+<div class="w-px h-4 bg-outline-variant"></div>
+<div class="text-sm text-stone-500 italic">Chef's Choice</div>
+</div>
+</div>
+<div class="w-full md:w-64 h-48 md:h-64 rounded-2xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500">
+<img class="w-full h-full object-cover" data-alt="close-up of traditional bengali fish curry served in a beautiful handmade terracotta pot with garnishes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMdO-jMgG_Le1VaPcL3-b-AZOGlZkwQHYuxQMDiwQuX0aghV2CczMj8qNoDyvcsVFIvdGeuQ8iq8uteTGTUmKlmC7tnsnydNd_2vFv6PbauFJ5zJQ4MWP0jcoo6WmCQUyKsijxdUGGZ67rBuavOn1JVTd9BbC388t3gDZDEUdH6Pk3DDL8UBjIKTO4U_D9xTShWK6mu1BQpNe4dn6x0hjWWL2Spef5RNax1HX08pTqrebhWZgMCvs9gDwY1xbNHzzEx4S21sJg3AY"/>
+</div>
+</section>
+</div>
+<!-- Right Column: Recent Activity -->
+<aside class="space-y-6">
+<div class="bg-surface-container-low rounded-2xl p-6 h-full flex flex-col">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-lg font-bold tracking-tight text-on-surface">Recent Activity</h3>
+<span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+</div>
+<div class="space-y-8 flex-1">
+<!-- Activity Item 1 -->
+<div class="flex gap-4 relative">
+<div class="absolute left-5 top-10 bottom-[-32px] w-px bg-outline-variant/30"></div>
+<div class="z-10 w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary ring-4 ring-surface-container-low">
+<span class="material-symbols-outlined text-sm">shopping_basket</span>
+</div>
+<div class="flex-1 pt-1">
+<p class="text-sm font-bold text-on-surface">New Order #8921</p>
+<p class="text-xs text-stone-500 mt-1">2x Traditional Meal Kits by Anika R.</p>
+<span class="text-[10px] text-stone-400 mt-2 block uppercase">2 minutes ago</span>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="flex gap-4 relative">
+<div class="absolute left-5 top-10 bottom-[-32px] w-px bg-outline-variant/30"></div>
+<div class="z-10 w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary ring-4 ring-surface-container-low">
+<span class="material-symbols-outlined text-sm">payments</span>
+</div>
+<div class="flex-1 pt-1">
+<p class="text-sm font-bold text-on-surface">Payment Verified</p>
+<p class="text-xs text-stone-500 mt-1">Invoice #8918 payment of ৳2,450 confirmed.</p>
+<span class="text-[10px] text-stone-400 mt-2 block uppercase">15 minutes ago</span>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="flex gap-4 relative">
+<div class="absolute left-5 top-10 bottom-[-32px] w-px bg-outline-variant/30"></div>
+<div class="z-10 w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary ring-4 ring-surface-container-low">
+<span class="material-symbols-outlined text-sm">assignment_turned_in</span>
+</div>
+<div class="flex-1 pt-1">
+<p class="text-sm font-bold text-on-surface">Manifest Generated</p>
+<p class="text-xs text-stone-500 mt-1">Evening delivery manifest ready for 12 locations.</p>
+<span class="text-[10px] text-stone-400 mt-2 block uppercase">42 minutes ago</span>
+</div>
+</div>
+<!-- Activity Item 4 -->
+<div class="flex gap-4">
+<div class="z-10 w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-stone-400 ring-4 ring-surface-container-low">
+<span class="material-symbols-outlined text-sm">person_add</span>
+</div>
+<div class="flex-1 pt-1">
+<p class="text-sm font-bold text-on-surface">New Customer</p>
+<p class="text-xs text-stone-500 mt-1">Zayan Mahmood joined the portal.</p>
+<span class="text-[10px] text-stone-400 mt-2 block uppercase">1 hour ago</span>
+</div>
+</div>
+</div>
+<button class="mt-8 w-full py-3 bg-surface-container-highest rounded-xl text-xs font-bold uppercase tracking-widest text-on-surface-variant hover:bg-outline-variant/20 transition-colors">
+                        View Full History
+                    </button>
+</div>
+</aside>
+</div>
+<!-- Trust Score Footer Component -->
+<footer class="mt-16 pt-8 border-t border-surface-container-high flex flex-col md:flex-row items-center justify-between gap-6 opacity-80">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full border-4 border-secondary/20 border-t-secondary relative flex items-center justify-center">
+<span class="text-xs font-bold text-on-surface">98%</span>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-wider text-secondary">Trust Score</p>
+<p class="text-xs text-stone-500">Platform Health: Excellent</p>
+</div>
+</div>
+<div class="h-8 w-px bg-surface-container-high"></div>
+<div class="text-xs text-stone-500">
+<p>© 2024 Matir Hari Artisanal Portal</p>
+<p>Mymensingh Heritage Division</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium text-stone-600">All systems operational</span>
+</div>
+</footer>
+</main>
+</body></html>

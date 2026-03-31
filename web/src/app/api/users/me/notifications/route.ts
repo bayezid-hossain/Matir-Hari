@@ -1,9 +1,9 @@
-import { NextRequest } from "next/server";
-import { eq, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { getAuthUser } from "@/lib/auth";
 import { ok, unauthorized } from "@/lib/response";
+import { desc, eq } from "drizzle-orm";
+import { NextRequest } from "next/server";
 
 /**
  * GET /api/users/me/notifications

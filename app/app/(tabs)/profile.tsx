@@ -195,9 +195,9 @@ export default function ProfileScreen() {
             </Text>
             <View className="bg-surface-container-low rounded-2xl overflow-hidden mb-4">
               {[
-                { icon: "👤", label: "Edit Personal Info", action: () => {} },
-                { icon: "📍", label: "Manage Saved Locations", action: () => {} },
-                { icon: "🔔", label: "Notifications", action: () => {} },
+                { icon: "👤", label: "Edit Personal Info", action: () => router.push("/profile/personal-info") },
+                { icon: "📍", label: "Manage Saved Locations", action: () => router.push("/profile/saved-locations") },
+                { icon: "🔔", label: "Notifications", action: () => router.push("/profile/notifications") },
               ].map((item, i) => (
                 <TouchableOpacity
                   key={item.label}

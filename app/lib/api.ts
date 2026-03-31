@@ -57,6 +57,16 @@ export async function login(
   });
 }
 
+export async function resetPassword(
+  phone: string,
+  newPassword: string
+): Promise<{ message: string }> {
+  return request("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ phone, newPassword }),
+  });
+}
+
 // ─── Menus ────────────────────────────────────────────────────────────────────
 
 export type MenuEntry = {
@@ -177,5 +187,27 @@ export async function updateMe(
   return request("/api/users/me", {
     method: "PATCH",
     body: JSON.stringify(updates),
+  });
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export type Notification = {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  orderId: string | null;
+  read: boolean;
+  createdAt: string;
+};
+
+export async function getNotifications(): Promise<Notification[]> {
+  return request("/api/users/me/notifications");
+}
+
+export async function markNotificationsRead(): Promise<{ message: string }> {
+  return request("/api/users/me/notifications", {
+    method: "PATCH",
   });
 }
