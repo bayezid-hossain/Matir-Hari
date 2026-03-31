@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+
+# env files
+.env
+.env*.local
+
+# ─── App (Expo / React Native) ─────────────────────────
+app/.expo/
+app/dist/
+app/web-build/
+app/.kotlin/
+app/.metro-health-check*
+app/app-example/
+
+# generated native folders — rebuild with `npx expo run:android`
+app/ios/
+app/android/
+
+# ─── Web (Next.js) ─────────────────────────────────────
+web/.next/
+web/out/
+
+# ─── General ───────────────────────────────────────────
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+*.tsbuildinfo
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store

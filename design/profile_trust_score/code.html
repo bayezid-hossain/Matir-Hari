@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#a53c21",
+              "primary-fixed": "#ffdbd2",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f5f3ef",
+              "surface-container": "#efeeea",
+              "on-primary-fixed-variant": "#84250b",
+              "outline-variant": "#dac1b8",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#eae8e4",
+              "on-tertiary-container": "#ffe1d8",
+              "surface-variant": "#e4e2de",
+              "surface-dim": "#dbdad6",
+              "on-tertiary": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#2c160e",
+              "outline": "#87736b",
+              "on-primary-fixed": "#3c0800",
+              "on-error": "#ffffff",
+              "surface": "#fbf9f5",
+              "primary": "#902d13",
+              "secondary-fixed-dim": "#f6be3b",
+              "primary-fixed-dim": "#ffb4a2",
+              "tertiary-fixed-dim": "#e7bdb1",
+              "primary-container": "#b14529",
+              "on-primary": "#ffffff",
+              "inverse-primary": "#ffb4a2",
+              "tertiary-container": "#816056",
+              "on-secondary-container": "#6f5100",
+              "inverse-surface": "#30312e",
+              "surface-container-highest": "#e4e2de",
+              "secondary-fixed": "#ffdea0",
+              "secondary": "#795900",
+              "surface-bright": "#fbf9f5",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#ffdbd0",
+              "tertiary": "#67483f",
+              "on-secondary-fixed": "#261900",
+              "secondary-container": "#fcc340",
+              "on-tertiary-fixed-variant": "#5d4037",
+              "on-secondary-fixed-variant": "#5c4300",
+              "on-background": "#1b1c1a",
+              "inverse-on-surface": "#f2f0ed",
+              "on-surface-variant": "#54433c",
+              "on-surface": "#1b1c1a",
+              "background": "#fbf9f5",
+              "on-primary-container": "#ffe1da"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Be Vietnam Pro', sans-serif;
+        background-color: #fbf9f5;
+        color: #1b1c1a;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-50 bg-[#fbf9f5] backdrop-blur-md shadow-[0_12px_32px_rgba(144,45,19,0.08)] flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#902d13]" data-icon="location_on">location_on</span>
+<span class="text-xl font-bold tracking-tight text-[#902d13]">Matir Hari</span>
+</div>
+<div class="flex items-center gap-2 text-[#902d13]">
+<span class="text-sm font-medium">Mymensingh</span>
+</div>
+</header>
+<main class="max-w-md mx-auto px-6 pt-8 space-y-8">
+<!-- Profile Header Section -->
+<section class="relative flex flex-col items-center text-center space-y-4">
+<div class="relative w-32 h-32 rounded-full p-1 bg-gradient-to-br from-primary to-primary-container shadow-xl">
+<img alt="User Profile" class="w-full h-full object-cover rounded-full border-4 border-surface" data-alt="close-up portrait of a smiling young South Asian man with neat hair against a warm neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNY7_i3-3rDsKN9m2PTRXxtPjKwC91Z-I73iGpybvWkrNhlGzuZaG3tUCh_kTOfyByK-oWEXR5fV1H8kH4ExpbmAZ91_AQi8ufL4u_URmpio5uLGhPYRo7bMsQFJO9ATHMj9GvdRSmD2HNF_LhJkUbWE8P5vHfPhn8yzi8JJZTiSVQ9PdtumvWGAz8bjwlbqYAZ7RxH6m-dDxXmHr0YeMllhHROrp91jNE_ll5R2okgwoqXi-9-14AzZUJt7VLpezGs49Mn9g9fTE"/>
+<button class="absolute bottom-1 right-1 bg-secondary-container text-on-secondary-container p-2 rounded-full shadow-lg hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight text-on-surface">Ariful Islam</h1>
+<p class="text-on-surface-variant font-medium">+880 1712-345678</p>
+</div>
+</section>
+<!-- Trust Score Bento Card -->
+<section class="bg-surface-container-low rounded-2xl p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full -mr-16 -mt-16"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="text-[0.6875rem] font-bold tracking-[0.05rem] uppercase text-secondary mb-1 block">Trust Score</span>
+<h2 class="text-2xl font-bold text-on-surface">Silver Member</h2>
+</div>
+<div class="flex items-center justify-center w-14 h-14 rounded-full border-4 border-secondary-fixed-dim relative">
+<span class="text-secondary font-bold text-lg">3/5</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="w-full bg-surface-variant rounded-full h-3 overflow-hidden">
+<div class="bg-gradient-to-r from-secondary to-secondary-container h-full w-[60%] rounded-full"></div>
+</div>
+<div class="bg-surface-container-highest rounded-xl p-4 border border-outline-variant/20">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="verified_user">verified_user</span>
+<div>
+<p class="text-sm font-bold text-on-surface">Unlock COD Benefits</p>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Complete <span class="text-primary font-bold">2 more successful orders</span> to waive the 50 BDT advance payment for Cash on Delivery.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Menu Actions -->
+<section class="space-y-3">
+<h3 class="text-[0.6875rem] font-bold tracking-[0.05rem] uppercase text-on-surface-variant px-2">Account Settings</h3>
+<div class="bg-surface-container-low rounded-2xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+<span class="font-semibold text-on-surface">Edit Personal Info</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-5 hover:bg-surface-container-high transition-colors group border-t border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+</div>
+<span class="font-semibold text-on-surface">Manage Saved Locations</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-5 hover:bg-surface-container-high transition-colors group border-t border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</div>
+<span class="font-semibold text-on-surface">Notifications</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="pt-4">
+<button class="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-surface-container-high text-error font-bold hover:bg-error-container transition-all active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                    Log Out
+                </button>
+</div>
+</section>
+<!-- Craftmanship Footer Note -->
+<footer class="text-center pt-8 pb-12 opacity-40 grayscale pointer-events-none">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="bakery_dining">bakery_dining</span>
+<p class="text-[0.625rem] font-bold uppercase tracking-widest">Handcrafted in Mymensingh</p>
+</footer>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full bg-[#fbf9f5] flex justify-around items-center px-4 pb-4 pt-2 z-50 rounded-t-2xl shadow-[0_-4px_20px_rgba(144,45,19,0.05)] border-t border-[#dac1b8]/20">
+<a class="flex flex-col items-center justify-center text-[#795900] p-2 hover:bg-[#f5f3ef] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[0.6875rem] font-bold uppercase tracking-tighter mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#795900] p-2 hover:bg-[#f5f3ef] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-[0.6875rem] font-bold uppercase tracking-tighter mt-1">History</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-[#902d13] to-[#b14529] text-white rounded-xl p-2 scale-110 transform translate-y-[-2px] duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-[0.6875rem] font-bold uppercase tracking-tighter mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

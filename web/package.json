@@ -1,0 +1,47 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:reset": "tsx scripts/reset-db.ts",
+    "db:backup": "node scripts/db-backup.js",
+    "db:restore": "node scripts/db-restore.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@paralleldrive/cuid2": "^3.3.0",
+    "@prisma/client": "^7.6.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
+    "better-auth": "^1.5.6",
+    "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.2",
+    "next": "16.2.1",
+    "postgres": "^3.4.8",
+    "prisma": "^7.6.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.3.1",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}

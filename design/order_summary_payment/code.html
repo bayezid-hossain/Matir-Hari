@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Matir Hari - Order Summary &amp; Payment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#a53c21",
+                        "primary-fixed": "#ffdbd2",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f5f3ef",
+                        "surface-container": "#efeeea",
+                        "on-primary-fixed-variant": "#84250b",
+                        "outline-variant": "#dac1b8",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae8e4",
+                        "on-tertiary-container": "#ffe1d8",
+                        "surface-variant": "#e4e2de",
+                        "surface-dim": "#dbdad6",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#2c160e",
+                        "outline": "#87736b",
+                        "on-primary-fixed": "#3c0800",
+                        "on-error": "#ffffff",
+                        "surface": "#fbf9f5",
+                        "primary": "#902d13",
+                        "secondary-fixed-dim": "#f6be3b",
+                        "primary-fixed-dim": "#ffb4a2",
+                        "tertiary-fixed-dim": "#e7bdb1",
+                        "primary-container": "#b14529",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb4a2",
+                        "tertiary-container": "#816056",
+                        "on-secondary-container": "#6f5100",
+                        "inverse-surface": "#30312e",
+                        "surface-container-highest": "#e4e2de",
+                        "secondary-fixed": "#ffdea0",
+                        "secondary": "#795900",
+                        "surface-bright": "#fbf9f5",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbd0",
+                        "tertiary": "#67483f",
+                        "on-secondary-fixed": "#261900",
+                        "secondary-container": "#fcc340",
+                        "on-tertiary-fixed-variant": "#5d4037",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "on-background": "#1b1c1a",
+                        "inverse-on-surface": "#f2f0ed",
+                        "on-surface-variant": "#54433c",
+                        "on-surface": "#1b1c1a",
+                        "background": "#fbf9f5",
+                        "on-primary-container": "#ffe1da"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #fbf9f5;
+            color: #1b1c1a;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- Top App Bar -->
+<nav class="sticky top-0 z-50 bg-[#fbf9f5] backdrop-blur-md shadow-[0_12px_32px_rgba(144,45,19,0.08)] flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#902d13]" data-icon="location_on">location_on</span>
+<span class="text-xl font-bold tracking-tight text-[#902d13]">Matir Hari</span>
+</div>
+<div class="text-[#902d13] font-medium">Mymensingh</div>
+</nav>
+<main class="max-w-2xl mx-auto px-6 pt-8 space-y-8">
+<!-- Editorial Header -->
+<header>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface leading-tight">
+                Complete Your <span class="text-primary">Order</span>
+</h1>
+<p class="mt-2 text-on-surface-variant max-w-md">Finalize your authentic Mymensingh culinary experience from our earthen kilns.</p>
+</header>
+<!-- Order Summary Bento Section -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Meal Details Card -->
+<div class="bg-surface-container-low rounded-xl p-6 flex flex-col justify-between">
+<div>
+<span class="text-[0.6875rem] font-bold tracking-[0.05rem] text-secondary uppercase block mb-2">Selected Meal</span>
+<h2 class="text-xl font-bold text-on-surface">Shorshe Ilish Feast</h2>
+<p class="text-sm text-on-surface-variant mt-2 leading-relaxed">Steamed rice, classic mustard hilsa in clay pot, mashed vegetables, and lentils.</p>
+</div>
+<div class="mt-6">
+<img alt="Traditional Bengali Mustard Fish in earthen pot" class="w-full h-32 object-cover rounded-lg" data-alt="Traditional Bengali Shorshe Ilish served in an authentic Matir Hari earthen pot with rich mustard sauce and green chillies" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDymEt7fr2roHZfu61zSo034QZ_xoGoAHG8FyuggO4zOJz8s8tQyga11wL-yqgcplx7w3zbUs5XOAYtvkSgapDEaUQ3Uye6GKvtM3xFDxnahHNjdGIyPLtbKbZ-dKAZCczY4WEq-DPeLH-7Vhwa8RaZnE86DSORo1acaHxqb5A8Nfops0qtppTFdtFOc7GK1hIFp2LXEXLUbb2f65gg_XM8jVtS1EQUxvXPpr_hBpcjKbN2gQ08gMx3zqLurn9FhrleIJ6Fu_MeoUw"/>
+</div>
+</div>
+<!-- Price Breakdown Card -->
+<div class="bg-surface-container-high rounded-xl p-6 space-y-4">
+<span class="text-[0.6875rem] font-bold tracking-[0.05rem] text-secondary uppercase block">Financial Summary</span>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant">Meal Subtotal</span>
+<span class="font-medium">৳ 450.00</span>
+</div>
+<div class="flex justify-between items-center text-primary font-semibold">
+<span class="flex items-center gap-1">
+                            Commitment Fee
+                            <span class="material-symbols-outlined text-sm" data-icon="info">info</span>
+</span>
+<span>৳ 50.00</span>
+</div>
+<div class="pt-3 mt-3 border-t border-outline-variant/20 flex justify-between items-end">
+<span class="text-on-surface font-bold">Total Due Now</span>
+<span class="text-2xl font-extrabold text-on-surface">৳ 50.00</span>
+</div>
+<p class="text-[0.6rem] text-on-surface-variant leading-tight mt-2">
+                        *The 50 BDT commitment fee secures your kitchen slot and is non-refundable after the 30-minute grace period. Remaining 400 BDT payable on delivery.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Payment Instructions -->
+<section class="bg-surface-container-low rounded-xl p-6">
+<div class="flex items-start gap-4">
+<div class="bg-secondary-container p-3 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div>
+<h3 class="text-lg font-bold">How to Pay</h3>
+<div class="mt-4 space-y-3 text-sm text-on-surface-variant">
+<p class="flex items-center gap-3">
+<span class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[0.6rem] shrink-0">1</span>
+                            Send <span class="font-bold text-on-surface">৳ 50.00</span> to <span class="font-bold text-on-surface">017XX-XXXXXX</span> via bKash or Nagad.
+                        </p>
+<p class="flex items-center gap-3">
+<span class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[0.6rem] shrink-0">2</span>
+                            Use <span class="font-bold text-on-surface">"MH-ORDER"</span> as the reference.
+                        </p>
+<p class="flex items-center gap-3">
+<span class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[0.6rem] shrink-0">3</span>
+                            Copy the Transaction ID (TrxID) and paste it below.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Manual Verification Form -->
+<section class="space-y-4">
+<h3 class="text-lg font-bold px-1">Payment Verification</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="relative group">
+<label class="block text-[0.6875rem] font-bold text-secondary uppercase mb-1 ml-1">Payment Method</label>
+<select class="w-full h-14 bg-surface-container-high border-none rounded-lg px-4 text-on-surface focus:ring-0 focus:border-b-2 focus:border-primary transition-all appearance-none">
+<option>bKash</option>
+<option>Nagad</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-[2.4rem] pointer-events-none text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</div>
+<div>
+<label class="block text-[0.6875rem] font-bold text-secondary uppercase mb-1 ml-1">Transaction ID (TrxID)</label>
+<input class="w-full h-14 bg-surface-container-high border-none rounded-lg px-4 text-on-surface placeholder:text-outline focus:ring-0 focus:border-b-2 focus:border-primary transition-all" placeholder="e.g. 8N7X9K2P0" type="text"/>
+</div>
+</div>
+</section>
+<!-- Refund Policy Information -->
+<section class="bg-error-container/20 rounded-xl p-4 border border-error/10">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-error" data-icon="history_toggle_off">history_toggle_off</span>
+<div>
+<h4 class="text-sm font-bold text-error">30-Minute Grace Period</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed mt-1">
+                        Refunds for the commitment fee are only available within 30 minutes of payment submission. After this period, our artisans begin firing the kilns for your meal.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Submit Order CTA -->
+<div class="pt-6 pb-12">
+<button class="w-full h-[56px] bg-gradient-to-br from-[#902d13] to-[#b14529] text-white font-bold rounded-lg flex items-center justify-center gap-2 shadow-[0_12px_32px_rgba(144,45,19,0.15)] active:scale-95 transition-all">
+                Submit Order
+                <span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</button>
+<p class="text-center text-[0.6875rem] text-on-surface-variant mt-4 uppercase tracking-widest">
+                Secure 256-bit Encrypted Verification
+            </p>
+</div>
+</main>
+<!-- Bottom Navigation Bar - Sub-page (Manual Filter: Hidden based on "Back" intent usually, but here as a destination shell) -->
+<!-- Suppression logic check: This is a Transactional/Checkout page. Suppressing BottomNavBar. -->
+<!-- Secondary Shell: Simple Back to Home -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+<button class="bg-surface text-on-surface shadow-[0_8px_24px_rgba(0,0,0,0.12)] px-6 py-3 rounded-full flex items-center gap-2 font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+            Back to Menu
+        </button>
+</div>
+</body></html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Matir Hari - Order Tracking &amp; History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#a53c21",
+              "primary-fixed": "#ffdbd2",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f5f3ef",
+              "surface-container": "#efeeea",
+              "on-primary-fixed-variant": "#84250b",
+              "outline-variant": "#dac1b8",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#eae8e4",
+              "on-tertiary-container": "#ffe1d8",
+              "surface-variant": "#e4e2de",
+              "surface-dim": "#dbdad6",
+              "on-tertiary": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#2c160e",
+              "outline": "#87736b",
+              "on-primary-fixed": "#3c0800",
+              "on-error": "#ffffff",
+              "surface": "#fbf9f5",
+              "primary": "#902d13",
+              "secondary-fixed-dim": "#f6be3b",
+              "primary-fixed-dim": "#ffb4a2",
+              "tertiary-fixed-dim": "#e7bdb1",
+              "primary-container": "#b14529",
+              "on-primary": "#ffffff",
+              "inverse-primary": "#ffb4a2",
+              "tertiary-container": "#816056",
+              "on-secondary-container": "#6f5100",
+              "inverse-surface": "#30312e",
+              "surface-container-highest": "#e4e2de",
+              "secondary-fixed": "#ffdea0",
+              "secondary": "#795900",
+              "surface-bright": "#fbf9f5",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#ffdbd0",
+              "tertiary": "#67483f",
+              "on-secondary-fixed": "#261900",
+              "secondary-container": "#fcc340",
+              "on-tertiary-fixed-variant": "#5d4037",
+              "on-secondary-fixed-variant": "#5c4300",
+              "on-background": "#1b1c1a",
+              "inverse-on-surface": "#f2f0ed",
+              "on-surface-variant": "#54433c",
+              "on-surface": "#1b1c1a",
+              "background": "#fbf9f5",
+              "on-primary-container": "#ffe1da"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="bg-[#fbf9f5] dark:bg-[#1b1c1a] flex justify-between items-center px-6 py-4 w-full docked full-width top-0 sticky z-50 shadow-[0_12px_32px_rgba(144,45,19,0.08)] backdrop-blur-md">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#902d13] dark:text-[#b14529]" data-icon="location_on">location_on</span>
+<span class="text-xl font-bold tracking-tight text-[#902d13] dark:text-[#fbf9f5] font-headline">Matir Hari</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-[#795900]">Mymensingh</span>
+<span class="material-symbols-outlined text-[#902d13]" data-icon="expand_more">expand_more</span>
+</div>
+</header>
+<main class="max-w-screen-md mx-auto px-6 pb-32">
+<!-- Live Tracking Header -->
+<section class="mt-8 mb-10">
+<div class="flex justify-between items-end mb-6">
+<div>
+<span class="text-label text-[0.6875rem] font-bold tracking-[0.05rem] uppercase text-secondary mb-1 block">Live Status</span>
+<h1 class="font-headline text-3xl font-extrabold text-on-surface leading-tight">Preparing your Hearth-Cooked Meal</h1>
+</div>
+<div class="text-right">
+<span class="text-label text-[0.6875rem] font-bold tracking-[0.05rem] uppercase text-outline mb-1 block">Estimated Delivery</span>
+<p class="font-headline text-xl font-bold text-primary">12:45 PM</p>
+</div>
+</div>
+<!-- Tracking Card -->
+<div class="bg-surface-container-low rounded-xl p-8 shadow-[0_12px_32px_rgba(144,45,19,0.04)] relative overflow-hidden">
+<!-- Background Decorative Gradient -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<!-- Live Timeline -->
+<div class="relative flex flex-col gap-8">
+<!-- Progress Line -->
+<div class="absolute left-[19px] top-4 bottom-4 w-1 bg-outline-variant/30 rounded-full">
+<div class="absolute top-0 left-0 w-full h-[66%] bg-gradient-to-b from-primary to-primary-container rounded-full"></div>
+</div>
+<!-- Stage 1: Done -->
+<div class="flex items-center gap-6 relative z-10">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined text-sm" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Payment Submitted</p>
+<p class="text-sm text-outline">Today, 12:10 PM</p>
+</div>
+</div>
+<!-- Stage 2: Done -->
+<div class="flex items-center gap-6 relative z-10">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined text-sm" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Verified</p>
+<p class="text-sm text-outline">Today, 12:12 PM</p>
+</div>
+</div>
+<!-- Stage 3: Current -->
+<div class="flex items-center gap-6 relative z-10">
+<div class="w-10 h-10 rounded-full bg-white border-4 border-primary flex items-center justify-center text-primary shadow-xl animate-pulse">
+<span class="material-symbols-outlined" data-icon="restaurant" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<div>
+<p class="font-bold text-lg text-primary">Cooking in Clay Pot</p>
+<p class="text-sm text-on-surface-variant">The chef is slow-cooking your Shorisha Ilish.</p>
+</div>
+</div>
+<!-- Stage 4: Upcoming -->
+<div class="flex items-center gap-6 relative z-10 opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-outline">
+<span class="material-symbols-outlined" data-icon="delivery_dining">delivery_dining</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Out for Delivery</p>
+<p class="text-sm text-outline">Expected in 15 mins</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Order Details Snippet -->
+<section class="mb-12 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<img alt="Traditional Bengali fish curry served in a clay pot" class="w-20 h-20 rounded-lg object-cover" data-alt="Close-up of a steaming traditional Bengali fish curry served in a rustic handmade matir hari clay pot with mustard sauce" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoUgbPRLkWcReonAZMoIDulWWMBNCPea8F4qJw4JqlsJ9cSDsIy70zdGt221VTPaJw13rpRaZaatQ508elkvcLmoUs1UbVVzXFt6MTQludtH6Hz0ywMJsCMDVXBUTRIak-PZ65XtL90JGtWNfU0t2hykXPk74im_3Y8xoak2BYRcfZBd7uQ5sd5DqeTjB0Ru5e8x9BTf051xbmxyhS2cqFFsnAilZU3UGsXUqjnOQ009nmTHjeo7oVoWut3wyHDhcGiSJiDdl2vVc"/>
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface">Shorisha Ilish &amp; Basmati</h3>
+<p class="text-sm text-outline mt-1">Order #MH-9842 • 2 Items</p>
+<div class="mt-3 flex items-center gap-2">
+<span class="text-[0.625rem] font-extrabold tracking-widest uppercase bg-secondary/10 text-secondary px-2 py-1 rounded">Authentic Hearth</span>
+</div>
+</div>
+</div>
+<p class="font-headline font-extrabold text-primary">৳850</p>
+</div>
+</section>
+<!-- Order History Section -->
+<section class="pt-8 border-t border-outline-variant/20">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline text-2xl font-extrabold text-on-surface">Recent Feasts</h2>
+<button class="text-sm font-bold text-primary hover:opacity-80 transition-opacity">View All</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- History Item 1 -->
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between group hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<img alt="Beef Rezala in clay pot" class="w-16 h-16 rounded-lg object-cover grayscale-[30%]" data-alt="Traditional slow-cooked beef rezala with rich gravy in a traditional earthen pot, warm side lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyl4YSpv9URXdwIDXDPHWKLZcRvjqCTydfxXSuBBHs9UjoQPy8smaOweg1TE0mB_XFpVe_rkReJZ4znGEwVTL1CHESaSwHzzo_F-E_ClpJQFpPRNEpOP9QF2U0sOIXSiqkvu5t5KMiWtICjQNuBpEuWu8IdWeouw0nZuHP9-cTIwa7mrzc4tnWKZPYETcMXWL6tVr-HgqF28t5ctOhjwM8pa-Tf2LIs_48hB5xyGOd-fDW3WNOgVoHXSxJY14nVVmsVBLm72UlHSs"/>
+<div>
+<h4 class="font-bold text-on-surface">Beef Rezala</h4>
+<p class="text-xs text-outline">Oct 24, 2023</p>
+<p class="text-sm font-bold text-secondary mt-1">৳1,200</p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="rebase_edit">rebase_edit</span>
+</button>
+</div>
+<!-- History Item 2 -->
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between group hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<img alt="Bhuna Khichuri" class="w-16 h-16 rounded-lg object-cover grayscale-[30%]" data-alt="Golden aromatic bhuna khichuri served with roasted eggplant on a traditional clay plate, warm heritage feel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSSv2hEguNR1JMoQgebas56K_quPQAtSRaczgLwcDVsd6GpVuBfKq8FcneTNysHR0r23QNX55xhtAu_9v0048BOdgQHcnqAIm8BJpkOUuPLk318MWVV8psSOr79-MXtJ01jXAllcrsOOGu7DKqececp8OaFQuB6-IZ6QdgBkJ1nI9EsBbNhbkDpVwgw-ogG4_cRp1dq_V22v5szYO66RNhbE5rmolihzZ6tM8D17iPK6rkNqxVWgSUkrYe065SeGnyRSPNcnOwTHc"/>
+<div>
+<h4 class="font-bold text-on-surface">Bhuna Khichuri</h4>
+<p class="text-xs text-outline">Oct 18, 2023</p>
+<p class="text-sm font-bold text-secondary mt-1">৳450</p>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="rebase_edit">rebase_edit</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-4 pt-2 bg-[#fbf9f5] dark:bg-[#1b1c1a] z-50 rounded-t-2xl border-t border-[#dac1b8]/20 shadow-[0_-4px_20px_rgba(144,45,19,0.05)]">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-[#795900] dark:text-[#e4e2de] p-2 hover:bg-[#f5f3ef] dark:hover:bg-[#2a2b29] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[0.6875rem] font-bold tracking-[0.05rem] uppercase font-label mt-1">Home</span>
+</a>
+<!-- History Active -->
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-[#902d13] to-[#b14529] text-white rounded-xl p-2 scale-110 transform translate-y-[-2px] shadow-lg" href="#">
+<span class="material-symbols-outlined active-icon" data-icon="history">history</span>
+<span class="text-[0.6875rem] font-bold tracking-[0.05rem] uppercase font-label mt-1">History</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#795900] dark:text-[#e4e2de] p-2 hover:bg-[#f5f3ef] dark:hover:bg-[#2a2b29] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[0.6875rem] font-bold tracking-[0.05rem] uppercase font-label mt-1">Profile</span>
+</a>
+</nav>
+</body></html>
