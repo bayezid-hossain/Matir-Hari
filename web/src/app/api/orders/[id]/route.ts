@@ -1,9 +1,16 @@
 import { NextRequest } from "next/server";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, menus, users } from "@/db/schema";
+import { v2 as cloudinary } from "cloudinary";
 import { getAuthUser } from "@/lib/auth";
 import { ok, err, unauthorized, notFound, forbidden } from "@/lib/response";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -132,7 +139,6 @@ export async function PATCH(
     case "submit_payment": {
       if (order.status !== "PendingPayment")
         return err("Order is not awaiting payment");
-      if (!trxId?.trim()) return err("TrxID is required");
       if (!paymentMethod || !["bKash", "Nagad"].includes(paymentMethod))
         return err("paymentMethod must be bKash or Nagad");
 
@@ -140,11 +146,29 @@ export async function PATCH(
         ? isCutoffPassed(menu.type as "Lunch" | "Dinner")
         : false;
 
+      // Extract old screenshot to delete if replaced
+      const [existing] = await db
+        .select({ paymentScreenshot: orders.paymentScreenshot })
+        .from(orders)
+        .where(eq(orders.id, id));
+
+      if (existing?.paymentScreenshot && paymentScreenshot && existing.paymentScreenshot !== paymentScreenshot) {
+        // Delete old one from Cloudinary
+        try {
+          const publicId = existing.paymentScreenshot.split("/").pop()?.split(".")[0];
+          if (publicId) {
+            await cloudinary.uploader.destroy(`matir-hari/payments/${publicId}`);
+          }
+        } catch (err) {
+          console.error("Cloudinary Delete Error:", err);
+        }
+      }
+
       const [updated] = await db
         .update(orders)
         .set({
-          trxId: trxId.trim(),
-          paymentMethod: paymentMethod as "bKash" | "Nagad",
+          trxId: trxId?.trim() || null,
+          paymentMethod: (paymentMethod as "bKash" | "Nagad") || "bKash",
           paymentScreenshot: paymentScreenshot?.trim() || null,
           paymentSubmittedAt: new Date(),
           cutOffReached,

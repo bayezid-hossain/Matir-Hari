@@ -1,8 +1,8 @@
 import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 
-const BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
-
+const RAW_API_URL = process.env.EXPO_PUBLIC_API_URL || (Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000');
+const BASE_URL = RAW_API_URL.endsWith("/") ? RAW_API_URL.slice(0, -1) : RAW_API_URL;
 /** Convert server-relative image paths to absolute URLs for mobile use. */
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -197,25 +197,46 @@ export async function uploadPaymentScreenshot(
   uri: string
 ): Promise<{ url: string }> {
   const formData = new FormData();
-  // @ts-ignore - FormData expects { uri, name, type } on mobile
+  const filename = uri.split("/").pop();
+  const match = /\.(\w+)$/.exec(filename || "");
+  const type = match ? `image/${match[1]}` : "image/jpeg";
+
+  // @ts-ignore
   formData.append("file", {
-    uri,
-    name: `payment_${Date.now()}.jpg`,
-    type: "image/jpeg",
+    uri: uri,
+    name: filename || `payment_${Date.now()}.jpg`,
+    type: type,
   });
 
   const token = await SecureStore.getItemAsync("auth_token");
-  const res = await fetch(`${BASE_URL}/api/orders/upload`, {
-    method: "POST",
-    body: formData,
-    headers: {
-      "Authorization": `Bearer ${token}`,
-    },
-  });
+  try {
+    const res = await fetch(`${BASE_URL}/api/orders/upload`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
 
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.error || "Upload failed");
-  return json;
+    if (!res.ok) {
+      const text = await res.text();
+      let errorMessage = "Upload failed";
+      try {
+        const errJson = JSON.parse(text);
+        errorMessage = errJson.error || errorMessage;
+      } catch {
+        errorMessage = `Server responded with ${res.status}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return await res.json();
+  } catch (error: any) {
+    if (error.message === 'Network request failed') {
+      throw new Error(`Connection error: ensure the API URL (${BASE_URL}) is reachable from your mobile device.`);
+    }
+    throw error;
+  }
 }
 
 export async function cancelOrder(

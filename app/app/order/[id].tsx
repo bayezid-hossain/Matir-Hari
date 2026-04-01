@@ -21,6 +21,7 @@ import { CustomAlert } from "@/store/alert-store";
 import { Ionicons } from "@expo/vector-icons";
 import { ReasonModal } from "@/components/ReasonModal";
 import { PaymentForm } from "@/components/PaymentForm";
+import { useKeyboard } from "@/hooks/use-keyboard";
 
 // ─── Timeline ────────────────────────────────────────────────────────────────
 
@@ -176,6 +177,8 @@ export default function OrderDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [modalType, setModalType] = useState<"cancel" | "change" | null>(null);
+  const [isEditingPayment, setIsEditingPayment] = useState(false);
+  const { isKeyboardVisible, keyboardHeight } = useKeyboard();
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -196,7 +199,7 @@ export default function OrderDetailScreen() {
   }, [load]);
 
   const canCancel =
-    order && !["Delivered", "Cancelled"].includes(order.status);
+    order && !["Delivered", "Cancelled", "PendingAdminAction"].includes(order.status);
 
   const handleCancelConfirm = async (reason: string) => {
     setModalType(null);
@@ -238,6 +241,8 @@ export default function OrderDetailScreen() {
       ? "#2E7D32"
       : order?.status === "PendingPayment"
       ? Colors.secondary
+      : order?.status === "PendingAdminAction"
+      ? "#ea580c"
       : Colors.outline;
 
   return (
@@ -281,9 +286,64 @@ export default function OrderDetailScreen() {
         <ActivityIndicator color={Colors.primary} size="large" style={{ marginTop: 60 }} />
       ) : !order ? null : (
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
+          contentContainerStyle={{ 
+            padding: 20, 
+            paddingBottom: isKeyboardVisible ? keyboardHeight + 60 : 140 
+          }}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
+          {/* Order meal card */}
+          <View
+            style={{
+              backgroundColor: Colors.surfaceContainerLowest,
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              borderWidth: 1,
+              borderColor: `${Colors.outlineVariant}18`,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1 }}>
+              <Image
+                source={{
+                  uri:
+                    order?.menu?.imageUrl ??
+                    "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=200",
+                }}
+                style={{ width: 64, height: 64, borderRadius: 10 }}
+                resizeMode="cover"
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: "700", color: Colors.onSurface }}>{order?.menu?.name}</Text>
+                <Text style={{ fontSize: 12, color: Colors.outline, marginTop: 2 }}>
+                  {new Date(order.orderedAt as string).toLocaleString("en-BD", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </Text>
+                <View style={{ flexDirection: "row", marginTop: 6, gap: 6 }}>
+                  <View style={{ backgroundColor: `${Colors.secondary}15`, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
+                    <Text style={{ fontSize: 10, fontWeight: "700", color: Colors.secondary, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                      {order?.menu?.type}
+                    </Text>
+                  </View>
+                  <View style={{ backgroundColor: `${statusColor}15`, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
+                    <Text style={{ fontSize: 10, fontWeight: "700", color: statusColor, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                      {order.status as string}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <Text style={{ fontSize: 20, fontWeight: "800", color: Colors.primary }}>
+              ৳{order.totalPrice}
+            </Text>
+          </View>
+
           {/* Status banner */}
           <View
             style={{
@@ -319,14 +379,14 @@ export default function OrderDetailScreen() {
             </View>
           </View>
 
-          {/* Payment missing warning */}
+          {/* Status-specific warning banners */}
           {order.status === "PendingPayment" && !order.trxId && (
             <View
               style={{
                 backgroundColor: `${Colors.secondary}14`,
                 borderRadius: 14,
                 padding: 16,
-                marginBottom: 16,
+                marginBottom: 20,
                 borderWidth: 1,
                 borderColor: `${Colors.secondary}30`,
                 flexDirection: "row",
@@ -346,72 +406,39 @@ export default function OrderDetailScreen() {
             </View>
           )}
 
-          {/* Live timeline */}
-          <Timeline order={order} />
-
-          {/* Inline payment form — shown when TrxID is missing */}
-          {order.status === "PendingPayment" && !order.trxId && (
-            <View style={{ marginTop: 16 }}>
-              <PaymentForm
-                orderId={id!}
-                onSuccess={load}
-              />
+          {order.status === "PendingAdminAction" && (
+            <View
+              style={{
+                backgroundColor: "#fff7ed",
+                borderRadius: 14,
+                padding: 16,
+                marginBottom: 20,
+                borderWidth: 1,
+                borderColor: "#fdba74",
+                flexDirection: "row",
+                alignItems: "flex-start",
+                gap: 12,
+              }}
+            >
+              <Ionicons name="alert-circle" size={22} color="#ea580c" style={{ marginTop: 1 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: "#9a3412", marginBottom: 4 }}>
+                  Cancellation Requested
+                </Text>
+                <Text style={{ fontSize: 13, color: "#c2410c", lineHeight: 19 }}>
+                  Your cancellation request has been sent to the admin. You will be notified once it is processed.
+                </Text>
+              </View>
             </View>
           )}
 
-          {/* Order meal card */}
-          <View
-            style={{
-              backgroundColor: Colors.surfaceContainerLowest,
-              borderRadius: 16,
-              padding: 16,
-              marginTop: 16,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              borderWidth: 1,
-              borderColor: `${Colors.outlineVariant}18`,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1 }}>
-              <Image
-                source={{
-                  uri:
-                    order.menu.imageUrl ??
-                    "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=200",
-                }}
-                style={{ width: 64, height: 64, borderRadius: 10 }}
-                resizeMode="cover"
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: "700", color: Colors.onSurface }}>{order.menu.name}</Text>
-                <Text style={{ fontSize: 12, color: Colors.outline, marginTop: 2 }}>
-                  {new Date(order.orderedAt as string).toLocaleString("en-BD", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </Text>
-                <View style={{ flexDirection: "row", marginTop: 6, gap: 6 }}>
-                  <View style={{ backgroundColor: `${Colors.secondary}15`, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
-                    <Text style={{ fontSize: 10, fontWeight: "700", color: Colors.secondary, textTransform: "uppercase", letterSpacing: 0.8 }}>
-                      {order.menu.type}
-                    </Text>
-                  </View>
-                  <View style={{ backgroundColor: `${statusColor}15`, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
-                    <Text style={{ fontSize: 10, fontWeight: "700", color: statusColor, textTransform: "uppercase", letterSpacing: 0.8 }}>
-                      {order.status as string}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-            <Text style={{ fontSize: 20, fontWeight: "800", color: Colors.primary }}>
-              ৳{order.totalPrice}
-            </Text>
+          {/* Live timeline */}
+          <View style={{ marginBottom: 20 }}>
+            <Timeline order={order} />
           </View>
 
           {/* Payment info */}
-          {!!order.trxId && (
+          {!!(order.trxId || order.paymentMethod) && !isEditingPayment && (
             <View
               style={{
                 backgroundColor: Colors.surfaceContainerLow,
@@ -421,17 +448,35 @@ export default function OrderDetailScreen() {
                 gap: 10,
               }}
             >
-              <Text style={{ fontSize: 11, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", color: Colors.secondary }}>
-                Payment Info
-              </Text>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <Text style={{ fontSize: 11, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", color: Colors.secondary }}>
+                  Payment Info
+                </Text>
+                {order.status === "PendingPayment" && (
+                  <TouchableOpacity
+                    onPress={() => setIsEditingPayment(true)}
+                    style={{ backgroundColor: `${Colors.primary}15`, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: "700", color: Colors.primary }}>Edit</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                 <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant }}>Method</Text>
                 <Text style={{ fontSize: 13, fontWeight: "600", color: Colors.onSurface }}>{order.paymentMethod as string}</Text>
               </View>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant }}>TrxID</Text>
-                <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.primary }}>{order.trxId as string}</Text>
-              </View>
+              {!!order.trxId && (
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant }}>TrxID</Text>
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.primary }}>{order.trxId as string}</Text>
+                </View>
+              )}
+              {!!order.paymentScreenshot && (
+                 <View style={{ marginTop: 4 }}>
+                   <Text style={{ fontSize: 11, fontWeight: "700", color: Colors.outline, textTransform: "uppercase", marginBottom: 6 }}>Proof Attachment</Text>
+                   <Image source={{ uri: order.paymentScreenshot }} style={{ width: "100%", height: 120, borderRadius: 10 }} resizeMode="cover" />
+                 </View>
+              )}
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                 <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant }}>Commitment Fee</Text>
                 <Text style={{ fontSize: 13, fontWeight: "600", color: Colors.onSurface }}>৳{order.commitmentFee}</Text>
@@ -444,6 +489,30 @@ export default function OrderDetailScreen() {
                   ৳{(order.totalPrice as number) + (order.deliveryFee as number) - (order.commitmentFee as number)}
                 </Text>
               </View>
+            </View>
+          )}
+
+          {/* Inline payment form — shown when info is missing OR user is editing */}
+          {order.status === "PendingPayment" && (!order.trxId && !order.paymentScreenshot || isEditingPayment) && (
+            <View style={{ marginTop: 16 }}>
+              <PaymentForm
+                orderId={id!}
+                initialTrxId={order.trxId || ""}
+                initialPaymentMethod={(order.paymentMethod as any) || "bKash"}
+                initialScreenshot={order.paymentScreenshot || undefined}
+                onSuccess={() => {
+                  setIsEditingPayment(false);
+                  load();
+                }}
+              />
+              {isEditingPayment && (
+                <TouchableOpacity
+                  onPress={() => setIsEditingPayment(false)}
+                  style={{ marginTop: 12, alignItems: "center" }}
+                >
+                  <Text style={{ fontSize: 13, fontWeight: "600", color: Colors.outline }}>Cancel Editing</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 

@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  Alert,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,6 +19,8 @@ import { CustomAlert } from "@/store/alert-store";
 interface PaymentFormProps {
   orderId: string;
   initialPaymentMethod?: "bKash" | "Nagad";
+  initialTrxId?: string;
+  initialScreenshot?: string;
   onSuccess: () => void;
   paddingBottom?: number;
 }
@@ -25,12 +28,14 @@ interface PaymentFormProps {
 export function PaymentForm({
   orderId,
   initialPaymentMethod = "bKash",
+  initialTrxId = "",
+  initialScreenshot = undefined,
   onSuccess,
   paddingBottom = 0,
 }: PaymentFormProps) {
   const [paymentMethod, setPaymentMethod] = useState<"bKash" | "Nagad">(initialPaymentMethod);
-  const [trxId, setTrxId] = useState("");
-  const [screenshotUri, setScreenshotUri] = useState<string | null>(null);
+  const [trxId, setTrxId] = useState(initialTrxId);
+  const [screenshotUri, setScreenshotUri] = useState<string | null>(initialScreenshot ?? null);
   const [submitting, setSubmitting] = useState(false);
 
   const handlePickImage = async () => {
@@ -52,21 +57,17 @@ export function PaymentForm({
   };
 
   const handleSubmit = async () => {
-    if (!trxId.trim()) {
-      CustomAlert.alert("Error", "Please enter your Transaction ID.");
-      return;
-    }
-
     setSubmitting(true);
     try {
-      let uploadedUrl: string | undefined;
-      if (screenshotUri) {
+      let uploadedUrl: string | undefined = screenshotUri || undefined;
+      // If it's a new local URI (starts with file:// or contains /Cache/), upload it
+      if (screenshotUri && !screenshotUri.startsWith("http")) {
         const uploadRes = await uploadPaymentScreenshot(screenshotUri);
         uploadedUrl = uploadRes.url;
       }
 
       await submitPayment(orderId, trxId.trim(), paymentMethod, uploadedUrl);
-      CustomAlert.alert("Success", "Payment submitted successfully!");
+      CustomAlert.alert("Success", "Payment info saved successfully!");
       onSuccess();
     } catch (error: any) {
       CustomAlert.alert("Error", error.message || "Failed to submit payment.");

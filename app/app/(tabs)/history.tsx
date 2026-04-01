@@ -26,7 +26,7 @@ const STATUS_META: Record<string, { label: string; color: string; icon: keyof ty
   OutForDelivery:    { label: "Handovered",           color: "#1565c0",        icon: "bicycle-outline" },
   Delivered:         { label: "Delivered",            color: "#2e7d32",        icon: "bag-check-outline" },
   Cancelled:         { label: "Cancelled",            color: Colors.error,     icon: "close-circle-outline" },
-  PendingAdminAction:{ label: "Pending Admin Review", color: Colors.secondary, icon: "hourglass-outline" },
+  PendingAdminAction:{ label: "Request Pending",      color: "#ea580c",        icon: "alert-circle-outline" },
 };
 
 const TIMELINE_STAGES: {
@@ -220,9 +220,16 @@ function ActiveOrderCard({
               {meta?.label ?? "Processing"}
             </Text>
           </View>
-          <Text style={{ fontSize: 12, fontWeight: "700", color: Colors.primary }}>
-            #{order.id.slice(-6).toUpperCase()}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text style={{ fontSize: 12, fontWeight: "700", color: Colors.primary }}>
+              #{order.id.slice(-6).toUpperCase()}
+            </Text>
+            <Ionicons
+              name={expanded ? "chevron-up" : "chevron-down"}
+              size={16}
+              color={Colors.primary}
+            />
+          </View>
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -285,6 +292,29 @@ function ActiveOrderCard({
         </TouchableOpacity>
       )}
 
+      {order.status === "PendingAdminAction" && (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            marginHorizontal: 14,
+            marginBottom: 14,
+            backgroundColor: "#fff7ed",
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            paddingVertical: 9,
+            borderWidth: 1,
+            borderColor: "#fdba74",
+          }}
+        >
+          <Ionicons name="alert-circle" size={16} color="#ea580c" />
+          <Text style={{ flex: 1, fontSize: 12, fontWeight: "600", color: "#c2410c", lineHeight: 17 }}>
+            Cancellation request pending admin review
+          </Text>
+        </View>
+      )}
+
       {expanded && (
         <View style={{ borderTopWidth: 1, borderTopColor: `${Colors.outlineVariant}18` }}>
           <View style={{ padding: 16 }}>
@@ -313,7 +343,7 @@ function ActiveOrderCard({
               </TouchableOpacity>
             )}
 
-            {!["Delivered", "Cancelled"].includes(order.status) && (
+            {!["Delivered", "Cancelled", "PendingAdminAction"].includes(order.status) && (
               <>
                 <View style={{ width: 1, backgroundColor: `${Colors.outlineVariant}15` }} />
                 <TouchableOpacity
