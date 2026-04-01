@@ -16,6 +16,7 @@ import { Colors } from "@/constants/colors";
 import { getMe, updateMe } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
 import { CustomAlert } from "@/store/alert-store";
+import { useKeyboard } from "@/hooks/use-keyboard";
 
 export default function PersonalInfoScreen() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function PersonalInfoScreen() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { isKeyboardVisible, keyboardHeight } = useKeyboard();
 
   useEffect(() => {
     getMe()
@@ -186,6 +188,9 @@ export default function PersonalInfoScreen() {
             </Text>
           </Text>
         </View>
+        
+        {/* Dynamic spacer for keyboard */}
+        <View style={{ height: isKeyboardVisible ? keyboardHeight : 20 }} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

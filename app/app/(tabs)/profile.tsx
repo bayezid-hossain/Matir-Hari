@@ -2,11 +2,11 @@ import { Colors } from "@/constants/colors";
 import { getMe, type UserProfile } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
 import { CustomAlert } from "@/store/alert-store";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -100,8 +100,8 @@ export default function ProfileScreen() {
         style={{ paddingTop: insets.top + 8, backgroundColor: "rgba(251,249,245,0.95)", shadowColor: Colors.primary, shadowOpacity: 0.06, shadowRadius: 16, elevation: 4 }}
         className="px-5 pb-4 flex-row items-center justify-between"
       >
-        <View className="flex-row items-center gap-1">
-          <Text>📍</Text>
+        <View className="flex-row items-center gap-2">
+          <Ionicons name="leaf-outline" size={18} color={Colors.primary} />
           <Text className="text-xl font-headline-extra text-primary" style={{ letterSpacing: -0.5 }}>Matir Hari</Text>
         </View>
         <Text className="text-secondary font-body-semibold text-sm">Mymensingh</Text>
@@ -134,7 +134,7 @@ export default function ProfileScreen() {
                 <View
                   style={{ width: "100%", height: "100%", borderRadius: 44, backgroundColor: Colors.surfaceContainerHigh, alignItems: "center", justifyContent: "center" }}
                 >
-                  <Text style={{ fontSize: 36 }}>👤</Text>
+                  <Ionicons name="person" size={38} color={Colors.outline} />
                 </View>
               </View>
               <Text className="text-3xl font-headline-extra text-on-surface" style={{ letterSpacing: -0.5 }}>{displayName}</Text>
@@ -151,7 +151,7 @@ export default function ProfileScreen() {
                 <View>
                   <Text className="text-[10px] font-label uppercase text-secondary mb-1" style={{ letterSpacing: 2 }}>Trust Score</Text>
                   <Text className="text-2xl font-headline text-on-surface">
-                    {perks.codUnlocked ? "Gold Member 🏅" : "Silver Member"}
+                    {perks.codUnlocked ? "Gold Member ✦" : "Silver Member"}
                   </Text>
                 </View>
                 <TrustScoreRing score={Math.min(trustScore, 5)} />
@@ -175,7 +175,7 @@ export default function ProfileScreen() {
                 style={{ borderWidth: 1, borderColor: `${Colors.outlineVariant}28` }}
               >
                 <View className="flex-row gap-3 items-start">
-                  <Text className="text-secondary text-lg">🏆</Text>
+                  <Ionicons name="trophy-outline" size={20} color={Colors.secondary} />
                   <View className="flex-1">
                     <Text className="text-sm font-body-semibold text-on-surface mb-1">
                       {perks.codUnlocked ? "COD Unlocked!" : "Unlock COD Benefits"}
@@ -195,11 +195,11 @@ export default function ProfileScreen() {
               Account Settings
             </Text>
             <View className="bg-surface-container-low rounded-2xl overflow-hidden mb-4">
-              {[
-                { icon: "👤", label: "Edit Personal Info", action: () => router.push("/profile/personal-info") },
-                { icon: "📍", label: "Manage Saved Locations", action: () => router.push("/profile/saved-locations") },
-                { icon: "🔔", label: "Notifications", action: () => router.push("/profile/notifications") },
-              ].map((item, i) => (
+              {([
+                { icon: "person-outline", label: "Edit Personal Info", action: () => router.push("/profile/personal-info") },
+                { icon: "location-outline", label: "Manage Saved Locations", action: () => router.push("/profile/saved-locations") },
+                { icon: "notifications-outline", label: "Notifications", action: () => router.push("/profile/notifications") },
+              ] as { icon: keyof typeof Ionicons.glyphMap; label: string; action: () => void }[]).map((item, i) => (
                 <TouchableOpacity
                   key={item.label}
                   onPress={item.action}
@@ -209,11 +209,11 @@ export default function ProfileScreen() {
                 >
                   <View className="flex-row items-center gap-4">
                     <View className="w-10 h-10 rounded-xl bg-primary-fixed items-center justify-center">
-                      <Text>{item.icon}</Text>
+                      <Ionicons name={item.icon} size={20} color={Colors.primary} />
                     </View>
                     <Text className="font-body-semibold text-on-surface">{item.label}</Text>
                   </View>
-                  <Text className="text-outline text-lg">›</Text>
+                  <Ionicons name="chevron-forward" size={18} color={Colors.outline} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -225,13 +225,13 @@ export default function ProfileScreen() {
               style={{ backgroundColor: Colors.surfaceContainerHigh }}
               activeOpacity={0.7}
             >
-              <Text className="text-error">🚪</Text>
+              <Ionicons name="log-out-outline" size={20} color={Colors.error} />
               <Text className="text-error font-body-semibold text-base">Log Out</Text>
             </TouchableOpacity>
 
             {/* Craft footer */}
             <View className="items-center mt-10 mb-4 opacity-30">
-              <Text className="text-2xl mb-1">🏺</Text>
+              <Ionicons name="cafe-outline" size={24} color={Colors.outline} style={{ marginBottom: 4 }} />
               <Text className="text-[10px] font-label uppercase text-outline" style={{ letterSpacing: 3 }}>
                 Handcrafted in Mymensingh
               </Text>

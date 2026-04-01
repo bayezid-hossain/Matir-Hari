@@ -9,162 +9,438 @@ import {
 } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ReasonModal } from "@/components/ReasonModal";
 import { Colors } from "@/constants/colors";
-import { getOrders, type Order } from "@/lib/api";
+import { getOrders, cancelOrder, type Order } from "@/lib/api";
+import { CustomAlert } from "@/store/alert-store";
+import { LayoutAnimation } from "react-native";
 
-const STATUS_META: Record<string, { label: string; color: string; emoji: string }> = {
-  PendingPayment: { label: "Awaiting Payment", color: Colors.secondary, emoji: "⏳" },
-  Confirmed: { label: "Confirmed", color: "#2e7d32", emoji: "✅" },
-  Cooking: { label: "Cooking in Clay Pot", color: Colors.primary, emoji: "🍲" },
-  OutForDelivery: { label: "Out for Delivery", color: "#1565c0", emoji: "🛵" },
-  Delivered: { label: "Delivered", color: "#2e7d32", emoji: "🎉" },
-  Cancelled: { label: "Cancelled", color: Colors.error, emoji: "❌" },
-  PendingAdminAction: { label: "Pending Admin Review", color: Colors.secondary, emoji: "🔍" },
+// ─── Config ──────────────────────────────────────────────────────────────────
+
+const STATUS_META: Record<string, { label: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = {
+  PendingPayment:    { label: "Awaiting Payment",    color: Colors.secondary, icon: "time-outline" },
+  Confirmed:         { label: "Confirmed",            color: "#2e7d32",        icon: "checkmark-circle-outline" },
+  Cooking:           { label: "Cooking in Clay Pot",  color: Colors.primary,   icon: "flame-outline" },
+  OutForDelivery:    { label: "Handovered",           color: "#1565c0",        icon: "bicycle-outline" },
+  Delivered:         { label: "Delivered",            color: "#2e7d32",        icon: "bag-check-outline" },
+  Cancelled:         { label: "Cancelled",            color: Colors.error,     icon: "close-circle-outline" },
+  PendingAdminAction:{ label: "Pending Admin Review", color: Colors.secondary, icon: "hourglass-outline" },
 };
 
-const TIMELINE_STAGES = [
-  { key: "orderedAt", label: "Payment Submitted", icon: "💳" },
-  { key: "confirmedAt", label: "Verified", icon: "✅" },
-  { key: "cookingStartedAt", label: "Cooking in Clay Pot", icon: "🍲" },
-  { key: "outForDeliveryAt", label: "Out for Delivery", icon: "🛵" },
-  { key: "deliveredAt", label: "Delivered", icon: "🎉" },
-] as const;
+const TIMELINE_STAGES: {
+  key: string;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { key: "orderedAt",         label: "Payment Submitted",   icon: "card-outline" },
+  { key: "confirmedAt",       label: "Verified",            icon: "checkmark-circle-outline" },
+  { key: "cookingStartedAt",  label: "Cooking in Clay Pot", icon: "flame-outline" },
+  { key: "outForDeliveryAt",  label: "Handovered (Out for Delivery)",    icon: "bicycle-outline" },
+  { key: "deliveredAt",       label: "Delivered",           icon: "bag-check-outline" },
+];
 
-function OrderTimeline({ order }: { order: Order & { paymentSubmittedAt?: string; cookingStartedAt?: string; outForDeliveryAt?: string } }) {
+const ACTIVE_STATUSES = [
+  "PendingPayment",
+  "Confirmed",
+  "Cooking",
+  "OutForDelivery",
+  "PendingAdminAction",
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const today = new Date(Date.now() + 6 * 3_600_000);
+  const todayStr = today.toISOString().slice(0, 10);
+  const yesterday = new Date(today.getTime() - 86_400_000).toISOString().slice(0, 10);
+  if (dateStr === todayStr) return "Today";
+  if (dateStr === yesterday) return "Yesterday";
+  return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+// ─── Timeline (active order) ──────────────────────────────────────────────────
+
+function OrderTimeline({
+  order,
+}: {
+  order: Order & Record<string, unknown>;
+}) {
   const statusMap: Record<string, string | null | undefined> = {
     orderedAt: order.orderedAt,
     confirmedAt: order.confirmedAt,
-    cookingStartedAt: (order as Record<string, unknown>).cookingStartedAt as string | undefined,
-    outForDeliveryAt: (order as Record<string, unknown>).outForDeliveryAt as string | undefined,
+    cookingStartedAt: order.cookingStartedAt as string | undefined,
+    outForDeliveryAt: order.outForDeliveryAt as string | undefined,
     deliveredAt: order.deliveredAt,
   };
 
-  const doneCount = TIMELINE_STAGES.filter((s) => statusMap[s.key]).length;
-
   return (
     <View
-      className="bg-surface-container-low rounded-xl p-6 mb-4"
-      style={{ shadowColor: Colors.primary, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2 }}
+      style={{
+        backgroundColor: Colors.surfaceContainerLow,
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 12,
+        shadowColor: Colors.primary,
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
+        elevation: 2,
+      }}
     >
-      {/* Decorative bg gradient */}
-      <View
-        className="absolute top-0 right-0 w-24 h-24 rounded-full"
-        style={{ backgroundColor: `${Colors.primary}08`, marginRight: -24, marginTop: -24 }}
-      />
-      <View className="relative">
-        {TIMELINE_STAGES.map((stage, i) => {
-          const isDone = Boolean(statusMap[stage.key]);
-          const isCurrent =
-            !isDone &&
-            (i === 0 || TIMELINE_STAGES.slice(0, i).every((s) => statusMap[s.key]));
-          const ts = statusMap[stage.key];
+      {TIMELINE_STAGES.map((stage, i) => {
+        const isDone = Boolean(statusMap[stage.key]);
+        const isCurrent =
+          !isDone && (i === 0 || TIMELINE_STAGES.slice(0, i).every((s) => statusMap[s.key]));
+        const ts = statusMap[stage.key];
 
-          return (
-            <View key={stage.key} className="flex-row items-start gap-4" style={{ marginBottom: i < TIMELINE_STAGES.length - 1 ? 24 : 0 }}>
-              {/* Connector line */}
-              {i < TIMELINE_STAGES.length - 1 && (
-                <View
-                  style={{
-                    position: "absolute",
-                    left: 19,
-                    top: 40,
-                    width: 2,
-                    height: 24,
-                    backgroundColor: isDone ? Colors.primary : `${Colors.outlineVariant}60`,
-                    borderRadius: 1,
-                  }}
-                />
-              )}
-              {/* Dot */}
+        return (
+          <View key={stage.key} style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: i < TIMELINE_STAGES.length - 1 ? 20 : 0 }}>
+            {/* Connector line */}
+            {i < TIMELINE_STAGES.length - 1 && (
               <View
                 style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: isDone
-                    ? Colors.primary
-                    : isCurrent
-                      ? Colors.surface
-                      : Colors.surfaceVariant,
-                  borderWidth: isCurrent ? 3 : 0,
-                  borderColor: isCurrent ? Colors.primary : "transparent",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  shadowColor: isDone ? Colors.primary : "transparent",
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: isDone ? 4 : 0,
+                  position: "absolute",
+                  left: 19,
+                  top: 40,
+                  width: 2,
+                  height: 20,
+                  backgroundColor: isDone ? Colors.primary : `${Colors.outlineVariant}60`,
+                  borderRadius: 1,
+                }}
+              />
+            )}
+            {/* Dot */}
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: isDone
+                  ? Colors.primary
+                  : isCurrent
+                  ? Colors.surfaceContainerLowest
+                  : Colors.surfaceContainerHighest,
+                borderWidth: isCurrent ? 2.5 : 0,
+                borderColor: isCurrent ? Colors.primary : "transparent",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: isDone ? Colors.primary : "transparent",
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: isDone ? 3 : 0,
+              }}
+            >
+              <Ionicons
+                name={isDone ? "checkmark" : stage.icon}
+                size={isDone ? 18 : 16}
+                color={isDone ? "#fff" : isCurrent ? Colors.primary : Colors.outline}
+              />
+            </View>
+            {/* Label */}
+            <View style={{ flex: 1, paddingTop: 2, paddingLeft: 14 }}>
+              <Text
+                style={{
+                  fontWeight: isCurrent ? "700" : "600",
+                  fontSize: isCurrent ? 15 : 13,
+                  color: isCurrent ? Colors.primary : isDone ? Colors.onSurface : Colors.outline,
                 }}
               >
-                <Text style={{ fontSize: isDone ? 16 : 14 }}>
-                  {isDone ? "✓" : stage.icon}
+                {stage.label}
+              </Text>
+              {ts ? (
+                <Text style={{ fontSize: 11, color: Colors.outline, marginTop: 1 }}>
+                  {new Date(ts).toLocaleTimeString("en-BD", { hour: "2-digit", minute: "2-digit" })}
                 </Text>
-              </View>
-              {/* Label */}
-              <View className="flex-1 pt-1">
-                <Text
-                  style={{
-                    fontWeight: isCurrent ? "700" : "600",
-                    fontSize: isCurrent ? 16 : 14,
-                    color: isCurrent ? Colors.primary : isDone ? Colors.onSurface : Colors.outline,
-                  }}
-                >
-                  {stage.label}
+              ) : isCurrent ? (
+                <Text style={{ fontSize: 12, color: Colors.onSurfaceVariant, marginTop: 1 }}>
+                  In progress…
                 </Text>
-                {ts ? (
-                  <Text className="text-xs text-outline mt-0.5">
-                    {new Date(ts).toLocaleTimeString("en-BD", { hour: "2-digit", minute: "2-digit" })}
-                  </Text>
-                ) : isCurrent ? (
-                  <Text className="text-sm text-on-surface-variant">In progress…</Text>
-                ) : (
-                  <Text className="text-xs text-outline opacity-50">Upcoming</Text>
-                )}
-              </View>
+              ) : (
+                <Text style={{ fontSize: 11, color: Colors.outline, marginTop: 1, opacity: 0.5 }}>
+                  Upcoming
+                </Text>
+              )}
             </View>
-          );
-        })}
-      </View>
+          </View>
+        );
+      })}
     </View>
   );
 }
 
-function HistoryCard({ order, onReorder }: { order: Order; onReorder: (o: Order) => void }) {
-  const meta = STATUS_META[order.status] ?? { label: order.status, color: Colors.outline, emoji: "📦" };
+// ─── Active Order Card ────────────────────────────────────────────────────────
+
+function ActiveOrderCard({
+  order,
+  onCancel,
+  onRefresh,
+}: {
+  order: Order & Record<string, unknown>;
+  onCancel: (id: string) => void;
+  onRefresh: () => void;
+}) {
+  const router = useRouter();
+  const [expanded, setExpanded] = useState(false);
+  const meta = STATUS_META[order.status];
+
+  const toggleExpand = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded(!expanded);
+  };
+
   return (
     <View
-      className="bg-surface-container-low rounded-xl p-4 mb-3 flex-row items-center justify-between"
+      style={{
+        backgroundColor: Colors.surfaceContainerLowest,
+        borderRadius: 16,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: `${Colors.outlineVariant}18`,
+        overflow: "hidden",
+        shadowColor: Colors.primary,
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
+        elevation: 2,
+      }}
     >
-      <View className="flex-row items-center gap-3 flex-1">
-        <Image
-          source={{ uri: order.menu.imageUrl ?? "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=200" }}
-          style={{ width: 64, height: 64, borderRadius: 10 }}
-          resizeMode="cover"
-        />
-        <View className="flex-1">
-          <Text className="text-on-surface font-body-semibold text-base">{order.menu.name}</Text>
-          <Text className="text-outline text-xs mt-0.5">
-            {new Date(order.orderedAt).toLocaleDateString("en-BD")}
-          </Text>
-          <View className="flex-row items-center gap-1 mt-1">
-            <Text style={{ fontSize: 12 }}>{meta.emoji}</Text>
-            <Text style={{ fontSize: 11, color: meta.color, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 }}>
-              {meta.label}
+      <TouchableOpacity
+        onPress={toggleExpand}
+        activeOpacity={0.9}
+        style={{ padding: 14 }}
+      >
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12 }}>
+          <View>
+            <Text style={{ fontSize: 10, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", color: Colors.secondary, marginBottom: 3 }}>
+              Live Status
+            </Text>
+            <Text style={{ fontSize: 20, fontWeight: "800", color: Colors.onSurface, letterSpacing: -0.5 }}>
+              {meta?.label ?? "Processing"}
             </Text>
           </View>
-          <Text className="text-secondary font-body-semibold text-sm mt-1">৳{order.totalPrice}</Text>
+          <Text style={{ fontSize: 12, fontWeight: "700", color: Colors.primary }}>
+            #{order.id.slice(-6).toUpperCase()}
+          </Text>
         </View>
-      </View>
-      <TouchableOpacity
-        onPress={() => onReorder(order)}
-        style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.surface, alignItems: "center", justifyContent: "center", shadowColor: Colors.primary, shadowOpacity: 0.1, shadowRadius: 8, elevation: 2 }}
-      >
-        <Text>🔄</Text>
+
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Image
+            source={{
+              uri:
+                order.menu.imageUrl ??
+                "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=200",
+            }}
+            style={{ width: 56, height: 56, borderRadius: 10 }}
+            resizeMode="cover"
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: Colors.onSurface }}>
+              {order.menu.name}
+            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+              <View style={{ backgroundColor: `${Colors.secondary}12`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99, flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Ionicons
+                  name={order.menu.type === "Lunch" ? "sunny-outline" : "moon-outline"}
+                  size={11}
+                  color={Colors.secondary}
+                />
+                <Text style={{ fontSize: 10, fontWeight: "700", color: Colors.secondary, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                  {order.menu.type}
+                </Text>
+              </View>
+              <Text style={{ fontSize: 16, fontWeight: "800", color: Colors.primary, marginLeft: "auto" }}>
+                ৳{order.totalPrice}
+              </Text>
+            </View>
+          </View>
+        </View>
       </TouchableOpacity>
+
+      {/* Payment missing warning strip */}
+      {order.status === "PendingPayment" && !order.trxId && (
+        <TouchableOpacity
+          onPress={() => router.push(`/order/${order.id}`)}
+          activeOpacity={0.7}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            marginHorizontal: 14,
+            marginBottom: 14,
+            backgroundColor: `${Colors.secondary}14`,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            paddingVertical: 9,
+            borderWidth: 1,
+            borderColor: `${Colors.secondary}28`,
+          }}
+        >
+          <Ionicons name="warning-outline" size={16} color={Colors.secondary} />
+          <Text style={{ flex: 1, fontSize: 12, fontWeight: "600", color: Colors.secondary, lineHeight: 17 }}>
+            Payment not submitted — tap to add your TrxID
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={Colors.secondary} />
+        </TouchableOpacity>
+      )}
+
+      {expanded && (
+        <View style={{ borderTopWidth: 1, borderTopColor: `${Colors.outlineVariant}18` }}>
+          <View style={{ padding: 16 }}>
+            <OrderTimeline order={order} />
+          </View>
+
+          {/* Action buttons */}
+          <View style={{ flexDirection: "row", borderTopWidth: 1, borderTopColor: `${Colors.outlineVariant}10` }}>
+            {order.status === "PendingPayment" && !order.trxId ? (
+              <TouchableOpacity
+                onPress={() => router.push(`/order/${order.id}`)}
+                activeOpacity={0.75}
+                style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 14, backgroundColor: `${Colors.secondary}10` }}
+              >
+                <Ionicons name="card-outline" size={17} color={Colors.secondary} />
+                <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.secondary }}>Submit Payment</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={() => router.push(`/order/${order.id}`)}
+                activeOpacity={0.75}
+                style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 14 }}
+              >
+                <Ionicons name="receipt-outline" size={17} color={Colors.primary} />
+                <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.primary }}>View Details</Text>
+              </TouchableOpacity>
+            )}
+
+            {!["Delivered", "Cancelled"].includes(order.status) && (
+              <>
+                <View style={{ width: 1, backgroundColor: `${Colors.outlineVariant}15` }} />
+                <TouchableOpacity
+                  onPress={() => onCancel(order.id)}
+                  activeOpacity={0.75}
+                  style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 14 }}
+                >
+                  <Ionicons name="close-circle-outline" size={17} color={Colors.error} />
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.error }}>Cancel</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      )}
     </View>
   );
 }
+
+// ─── Past order group (collapsible) ──────────────────────────────────────────
+
+function DateGroup({
+  date,
+  orders,
+  onViewOrder,
+}: {
+  date: string;
+  orders: Order[];
+  onViewOrder: (id: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <View style={{ marginBottom: 10 }}>
+      {/* Group header */}
+      <TouchableOpacity
+        onPress={() => setExpanded((v) => !v)}
+        activeOpacity={0.7}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingVertical: 10,
+          paddingHorizontal: 4,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Ionicons name="calendar-outline" size={15} color={Colors.secondary} />
+          <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.secondary, textTransform: "uppercase", letterSpacing: 0.8 }}>
+            {formatDate(date)}
+          </Text>
+          <View
+            style={{
+              backgroundColor: `${Colors.secondary}15`,
+              borderRadius: 99,
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+            }}
+          >
+            <Text style={{ fontSize: 11, fontWeight: "700", color: Colors.secondary }}>
+              {orders.length}
+            </Text>
+          </View>
+        </View>
+        <Ionicons
+          name={expanded ? "chevron-up" : "chevron-down"}
+          size={18}
+          color={Colors.outline}
+        />
+      </TouchableOpacity>
+
+      {/* Separator */}
+      <View style={{ height: 1, backgroundColor: `${Colors.outlineVariant}30`, marginHorizontal: 4, marginBottom: expanded ? 8 : 0 }} />
+
+      {/* Order cards */}
+      {expanded &&
+        orders.map((order) => {
+          const meta = STATUS_META[order.status] ?? { label: order.status, color: Colors.outline, icon: "cube-outline" as keyof typeof Ionicons.glyphMap };
+          return (
+            <TouchableOpacity
+              key={order.id}
+              onPress={() => onViewOrder(order.id)}
+              activeOpacity={0.8}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: Colors.surfaceContainerLowest,
+                borderRadius: 14,
+                padding: 14,
+                marginBottom: 8,
+                borderWidth: 1,
+                borderColor: `${Colors.outlineVariant}20`,
+                gap: 12,
+              }}
+            >
+              <Image
+                source={{
+                  uri:
+                    order.menu.imageUrl ??
+                    "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=200",
+                }}
+                style={{ width: 56, height: 56, borderRadius: 10 }}
+                resizeMode="cover"
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: Colors.onSurface }} numberOfLines={1}>
+                  {order.menu.name}
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 4 }}>
+                  <Ionicons name={meta.icon} size={12} color={meta.color} />
+                  <Text style={{ fontSize: 11, fontWeight: "700", color: meta.color, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    {meta.label}
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.secondary, marginTop: 4 }}>
+                  ৳{order.totalPrice}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={Colors.outline} />
+            </TouchableOpacity>
+          );
+        })}
+    </View>
+  );
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -172,124 +448,157 @@ export default function HistoryScreen() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const data = await getOrders();
       setOrders(data);
-    } catch { /* handle offline */ }
-    finally {
+    } catch {
+      /* handle offline */
+    } finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
-
-  const activeOrder = orders.find((o) =>
-    ["PendingPayment", "Confirmed", "Cooking", "OutForDelivery"].includes(o.status)
-  );
-  const pastOrders = orders.filter((o) => !["PendingPayment", "Confirmed", "Cooking", "OutForDelivery"].includes(o.status));
-
-  const handleReorder = (order: Order) => {
-    router.push({ pathname: "/checkout", params: { menuId: order.menu.id } });
+  const handleCancelOrder = async () => {
+    if (!cancellingId || !cancellationReason.trim()) return;
+    setActionLoading(true);
+    try {
+      await cancelOrder(cancellingId, cancellationReason.trim());
+      CustomAlert.alert("Success", "Order cancellation requested.");
+      load();
+    } catch (e: any) {
+      CustomAlert.alert("Error", e.message || "Failed to cancel order.");
+    } finally {
+      setActionLoading(false);
+      setCancellingId(null);
+      setCancellationReason("");
+    }
   };
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const activeOrders = orders.filter((o) => ACTIVE_STATUSES.includes(o.status));
+  const pastOrders = orders.filter((o) => !ACTIVE_STATUSES.includes(o.status));
+
+  // Group past orders by effective date (deliveryDate or orderedAt date)
+  const grouped: Record<string, Order[]> = {};
+  for (const o of pastOrders) {
+    const key = o.deliveryDate ?? o.orderedAt.slice(0, 10);
+    (grouped[key] ??= []).push(o);
+  }
+  const groupedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
   return (
-    <View className="flex-1 bg-surface">
+    <View style={{ flex: 1, backgroundColor: Colors.surface }}>
       {/* Header */}
       <View
-        style={{ paddingTop: insets.top + 8, backgroundColor: "rgba(251,249,245,0.95)", shadowColor: Colors.primary, shadowOpacity: 0.06, shadowRadius: 16, elevation: 4 }}
-        className="px-5 pb-4 flex-row items-center justify-between"
+        style={{
+          paddingTop: insets.top + 8,
+          paddingBottom: 14,
+          paddingHorizontal: 20,
+          backgroundColor: "rgba(251,249,245,0.95)",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          shadowColor: Colors.primary,
+          shadowOpacity: 0.06,
+          shadowRadius: 16,
+          elevation: 4,
+        }}
       >
-        <View className="flex-row items-center gap-1">
-          <Text>📍</Text>
-          <Text className="text-xl font-headline-extra text-primary" style={{ letterSpacing: -0.5 }}>Matir Hari</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="leaf-outline" size={18} color={Colors.primary} />
+          <Text style={{ fontSize: 20, fontWeight: "800", color: Colors.primary, letterSpacing: -0.5 }}>
+            Matir Hari
+          </Text>
         </View>
-        <Text className="text-secondary font-body-semibold text-sm">Mymensingh</Text>
+        <Text style={{ fontSize: 13, fontWeight: "600", color: Colors.secondary }}>Mymensingh</Text>
       </View>
 
       <ScrollView
-        className="flex-1"
+        style={{ flex: 1 }}
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={Colors.primary} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => { setRefreshing(true); load(); }}
+            tintColor={Colors.primary}
+          />
+        }
         showsVerticalScrollIndicator={false}
       >
         {loading ? (
           <ActivityIndicator color={Colors.primary} size="large" style={{ marginTop: 40 }} />
         ) : (
           <>
-            {/* Live tracking section */}
-            {activeOrder && (
-              <View className="mb-8">
-                <View className="flex-row justify-between items-end mb-5">
-                  <View>
-                    <Text className="text-[10px] font-label uppercase text-secondary mb-1" style={{ letterSpacing: 2 }}>Live Status</Text>
-                    <Text className="text-2xl font-headline-extra text-on-surface leading-tight" style={{ letterSpacing: -0.5 }}>
-                      {STATUS_META[activeOrder.status]?.label ?? "Processing"}
-                    </Text>
-                  </View>
-                  <View className="items-end">
-                    <Text className="text-[10px] font-label uppercase text-outline mb-1" style={{ letterSpacing: 1 }}>Order</Text>
-                    <Text className="text-sm font-headline text-primary">#{activeOrder.id.slice(-6).toUpperCase()}</Text>
-                  </View>
-                </View>
-                <OrderTimeline order={activeOrder} />
+            {/* ── Active orders ─────────────────────────────────────── */}
+            {activeOrders.map((activeOrder) => (
+              <ActiveOrderCard
+                key={activeOrder.id}
+                order={activeOrder as Order & Record<string, unknown>}
+                onCancel={(id) => setCancellingId(id)}
+                onRefresh={load}
+              />
+            ))}
 
-                {/* Active order meal snippet */}
-                <View
-                  className="bg-surface-container-lowest p-5 rounded-xl flex-row justify-between items-center"
-                  style={{ borderWidth: 1, borderColor: `${Colors.outlineVariant}18` }}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <Image
-                      source={{ uri: activeOrder.menu.imageUrl ?? "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=200" }}
-                      style={{ width: 56, height: 56, borderRadius: 10 }}
-                      resizeMode="cover"
-                    />
-                    <View>
-                      <Text className="text-on-surface font-headline font-bold text-base">{activeOrder.menu.name}</Text>
-                      <Text className="text-outline text-xs mt-0.5">Order #{activeOrder.id.slice(-6).toUpperCase()}</Text>
-                      <View className="mt-1">
-                        <Text className="text-[10px] font-label uppercase bg-secondary/10 text-secondary px-2 py-0.5 rounded self-start" style={{ letterSpacing: 1 }}>
-                          {activeOrder.menu.type}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <Text className="text-primary font-headline-extra text-lg">৳{activeOrder.totalPrice}</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Past orders */}
+            {/* ── Past orders grouped by date ────────────────────────── */}
             {pastOrders.length > 0 && (
-              <View>
-                <View className="flex-row justify-between items-center mb-4">
-                  <Text className="text-2xl font-headline-extra text-on-surface">Recent Feasts</Text>
-                  <TouchableOpacity>
-                    <Text className="text-sm font-body-semibold text-primary">View All</Text>
-                  </TouchableOpacity>
-                </View>
-                {pastOrders.slice(0, 5).map((o) => (
-                  <HistoryCard key={o.id} order={o} onReorder={handleReorder} />
+              <View style={{ marginTop: activeOrders.length > 0 ? 4 : 0 }}>
+                <Text style={{ fontSize: 22, fontWeight: "800", color: Colors.onSurface, marginBottom: 12, letterSpacing: -0.5 }}>
+                  Order History
+                </Text>
+                {groupedDates.map((date) => (
+                  <DateGroup
+                    key={date}
+                    date={date}
+                    orders={grouped[date]}
+                    onViewOrder={(id) => router.push(`/order/${id}`)}
+                  />
                 ))}
               </View>
             )}
 
             {orders.length === 0 && (
-              <View className="items-center py-16">
-                <Text className="text-5xl mb-4">🍲</Text>
-                <Text className="text-on-surface font-body-semibold text-base mb-2">No orders yet</Text>
-                <Text className="text-on-surface-variant text-sm text-center">Place your first order from today&apos;s menu!</Text>
-                <TouchableOpacity onPress={() => router.replace("/(tabs)")} className="mt-5">
-                  <Text className="text-primary font-body-semibold">View Today&apos;s Menu →</Text>
+              <View style={{ alignItems: "center", paddingVertical: 64 }}>
+                <Ionicons name="restaurant-outline" size={56} color={`${Colors.primary}40`} style={{ marginBottom: 16 }} />
+                <Text style={{ fontSize: 17, fontWeight: "700", color: Colors.onSurface, marginBottom: 6 }}>
+                  No orders yet
+                </Text>
+                <Text style={{ fontSize: 14, color: Colors.onSurfaceVariant, textAlign: "center" }}>
+                  Place your first order from today&apos;s menu!
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.replace("/(tabs)")}
+                  style={{ marginTop: 20, flexDirection: "row", alignItems: "center", gap: 6 }}
+                >
+                  <Text style={{ color: Colors.primary, fontWeight: "600", fontSize: 14 }}>
+                    View Today&apos;s Menu
+                  </Text>
+                  <Ionicons name="arrow-forward" size={14} color={Colors.primary} />
                 </TouchableOpacity>
               </View>
             )}
           </>
         )}
       </ScrollView>
+
+      <ReasonModal
+        visible={!!cancellingId}
+        loading={actionLoading}
+        title="Cancel Order"
+        subtitle="Please provide a reason for cancelling this order."
+        confirmLabel="Confirm Cancel"
+        confirmColor={Colors.error}
+        onConfirm={handleCancelOrder}
+        onDismiss={() => setCancellingId(null)}
+      />
     </View>
   );
 }

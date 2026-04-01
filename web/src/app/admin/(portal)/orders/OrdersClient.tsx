@@ -11,9 +11,8 @@ type Order = {
   totalPrice: number;
   commitmentFee: number;
   deliveryFee: number;
-  cancelReason: string | null;
-  adminNote: string | null;
   deliveryAddress: { address?: string; lat?: number; lng?: number } | null;
+  paymentScreenshot: string | null;
   orderedAt: string;
   paymentSubmittedAt: string | null;
   confirmedAt: string | null;
@@ -50,6 +49,7 @@ export function OrdersClient({ initialStatus }: { initialStatus?: string }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -382,11 +382,23 @@ export function OrdersClient({ initialStatus }: { initialStatus?: string }) {
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-1 items-start">
                       {getStatusBadge(order)}
-                      {(order.trxId || order.paymentMethod) && (
-                        <code className="text-[10px] font-mono bg-surface-container-high px-2 py-0.5 rounded text-primary border border-outline-variant/20 w-fit">
-                          {order.trxId ? `TrxID: ${order.trxId}` : order.paymentMethod}
-                        </code>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {(order.trxId || order.paymentMethod) && (
+                          <code className="text-[10px] font-mono bg-surface-container-high px-2 py-0.5 rounded text-primary border border-outline-variant/20 w-fit">
+                            {order.trxId ? `TrxID: ${order.trxId}` : order.paymentMethod}
+                          </code>
+                        )}
+                        {order.paymentScreenshot && (
+                          <button
+                            onClick={() => setPreviewImage(order.paymentScreenshot)}
+                            className="bg-primary/10 text-primary p-1 rounded-md hover:bg-primary/20 transition-colors flex items-center gap-1"
+                            title="View Screenshot"
+                          >
+                            <span className="material-symbols-outlined text-sm">image</span>
+                            <span className="text-[9px] font-bold uppercase">Proof</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">
@@ -398,6 +410,51 @@ export function OrdersClient({ initialStatus }: { initialStatus?: string }) {
               ))}
             </tbody>
           </table>
+
+          {/* Screenshot Preview Modal */}
+          {previewImage && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+              <div
+                className="absolute inset-0 bg-on-surface/60 backdrop-blur-md animate-in fade-in duration-300"
+                onClick={() => setPreviewImage(null)}
+              />
+              <div className="relative max-w-4xl max-h-[90vh] bg-surface rounded-2xl overflow-hidden shadow-2xl border border-outline-variant/10 animate-in zoom-in-95 duration-300">
+                <div className="p-4 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
+                  <h4 className="font-bold text-on-surface">Payment Verification Proof</h4>
+                  <button
+                    onClick={() => setPreviewImage(null)}
+                    className="p-1.5 hover:bg-surface-container-high rounded-full transition-colors"
+                  >
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <div className="overflow-auto max-h-[calc(90vh-64px)] bg-black/5 p-4 flex items-center justify-center">
+                  <img
+                    src={previewImage}
+                    alt="Payment Screenshot"
+                    className="max-w-full h-auto rounded-lg shadow-inner"
+                  />
+                </div>
+                <div className="p-4 bg-surface-container-low flex justify-end gap-3">
+                  <a
+                    href={previewImage}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-surface-container-high text-on-surface rounded-lg hover:bg-surface-container-highest transition-colors flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-sm">open_in_new</span>
+                    Open Original
+                  </a>
+                  <button
+                    onClick={() => setPreviewImage(null)}
+                    className="px-6 py-2 text-xs font-bold uppercase tracking-wider bg-primary text-on-primary rounded-lg shadow-lg shadow-primary/20 hover:opacity-90 transition-all font-headline"
+                  >
+                    Everything looks good
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </section>

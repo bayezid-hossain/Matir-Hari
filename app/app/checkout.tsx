@@ -10,7 +10,8 @@ import {
   Platform,
   Image,
 } from "react-native";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
+import React from "react";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,6 +26,8 @@ import {
   type LocationData,
 } from "@/lib/api";
 import { CustomAlert } from "@/store/alert-store";
+import { useKeyboard } from "@/hooks/use-keyboard";
+import { PaymentForm } from "@/components/PaymentForm";
 
 const BKASH_NUMBER = "017XX-XXXXXX"; // Replace in production
 
@@ -47,11 +50,13 @@ export default function CheckoutScreen() {
     deliveryDate?: string;
   }>();
 
+  const scrollRef = useRef<ScrollView>(null);
   const [menu, setMenu] = useState<MenuEntry | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [step, setStep] = useState<"summary" | "payment" | "done">("summary");
   const [paymentMethod, setPaymentMethod] = useState<"bKash" | "Nagad">("bKash");
   const [trxId, setTrxId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<SavedLocation | null>(
     null
@@ -92,6 +97,8 @@ export default function CheckoutScreen() {
     }, [])
   );
 
+  const { isKeyboardVisible, keyboardHeight } = useKeyboard();
+
   const handlePlaceOrder = async () => {
     if (!menuId) return;
 
@@ -110,7 +117,7 @@ export default function CheckoutScreen() {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       const order = await createOrder(
         menuId,
@@ -129,25 +136,7 @@ export default function CheckoutScreen() {
         e instanceof Error ? e.message : "Failed to place order."
       );
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmitPayment = async () => {
-    if (!orderId) return;
-    if (!trxId.trim())
-      return CustomAlert.alert("Missing TrxID", "Please enter your Transaction ID.");
-    setLoading(true);
-    try {
-      await submitPayment(orderId, trxId.trim(), paymentMethod);
-      setStep("done");
-    } catch (e: unknown) {
-      CustomAlert.alert(
-        "Error",
-        e instanceof Error ? e.message : "Failed to submit payment."
-      );
-    } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -160,10 +149,7 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-surface"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View className="flex-1 bg-surface">
       {/* Header */}
       <View
         style={{
@@ -188,8 +174,12 @@ export default function CheckoutScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         className="flex-1"
-        contentContainerStyle={{ padding: 20, paddingBottom: 120 }}
+        contentContainerStyle={{ 
+          padding: 20, 
+          paddingBottom: isKeyboardVisible ? keyboardHeight + 40 : 120 
+        }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -384,82 +374,12 @@ export default function CheckoutScreen() {
         {/* ── STEP 2: Payment ────────────────────────────────────────────── */}
         {step === "payment" && (
           <View className="gap-5 mb-6">
-            {/* Payment instructions */}
-            <View className="bg-surface-container-low rounded-xl p-5">
-              <View className="flex-row gap-4 items-start">
-                <View className="bg-secondary-container p-3 rounded-lg">
-                  <Text className="text-on-secondary-container text-xl">💳</Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-on-surface font-body-semibold text-base mb-4">
-                    How to Pay
-                  </Text>
-                  {[
-                    `Send ৳50.00 to ${BKASH_NUMBER} via bKash or Nagad.`,
-                    'Use "MH-ORDER" as the reference.',
-                    "Copy the Transaction ID (TrxID) and paste below.",
-                  ].map((s, i) => (
-                    <View key={i} className="flex-row items-start gap-3 mb-3">
-                      <View className="w-5 h-5 rounded-full bg-primary items-center justify-center">
-                        <Text className="text-white text-[10px] font-bold">
-                          {i + 1}
-                        </Text>
-                      </View>
-                      <Text className="flex-1 text-sm text-on-surface-variant leading-snug">
-                        {s}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </View>
-
-            {/* Payment method selector */}
-            <View>
-              <Text
-                className="text-[10px] font-label uppercase text-secondary mb-2 ml-1"
-                style={{ letterSpacing: 2 }}
-              >
-                Payment Method
-              </Text>
-              <View className="flex-row gap-3">
-                {(["bKash", "Nagad"] as const).map((m) => (
-                  <TouchableOpacity
-                    key={m}
-                    onPress={() => setPaymentMethod(m)}
-                    className="flex-1 h-14 rounded-xl items-center justify-center"
-                    style={{
-                      backgroundColor:
-                        paymentMethod === m
-                          ? Colors.primaryFixed
-                          : Colors.surfaceContainerHigh,
-                      borderWidth: paymentMethod === m ? 2 : 0,
-                      borderColor: Colors.primary,
-                    }}
-                  >
-                    <Text className="font-body-semibold text-on-surface">{m}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* TrxID input */}
-            <View>
-              <Text
-                className="text-[10px] font-label uppercase text-secondary mb-2 ml-1"
-                style={{ letterSpacing: 2 }}
-              >
-                Transaction ID (TrxID)
-              </Text>
-              <TextInput
-                className="h-14 bg-surface-container-high rounded-xl px-4 text-on-surface text-base"
-                placeholder="e.g. 8N7X9K2P0"
-                placeholderTextColor={Colors.outline}
-                value={trxId}
-                onChangeText={setTrxId}
-                autoCapitalize="characters"
-              />
-            </View>
+            {/* Payment Details */}
+            <PaymentForm
+              orderId={orderId!}
+              paddingBottom={20}
+              onSuccess={() => setStep("done")}
+            />
           </View>
         )}
 
@@ -489,10 +409,10 @@ export default function CheckoutScreen() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      {step !== "done" && (
+      {step === "summary" && (
         <View
           style={{
-            paddingBottom: insets.bottom + 16,
+            paddingBottom: isKeyboardVisible ? keyboardHeight : (insets.bottom + 16),
             paddingHorizontal: 20,
             paddingTop: 12,
             backgroundColor: Colors.surface,
@@ -501,8 +421,8 @@ export default function CheckoutScreen() {
           }}
         >
           <TouchableOpacity
-            onPress={step === "summary" ? handlePlaceOrder : handleSubmitPayment}
-            disabled={loading}
+            onPress={handlePlaceOrder}
+            disabled={submitting}
             activeOpacity={0.85}
           >
             <LinearGradient
@@ -511,31 +431,24 @@ export default function CheckoutScreen() {
               end={{ x: 1, y: 1 }}
               style={{
                 height: 56,
-                borderRadius: 12,
+                borderRadius: 16,
                 alignItems: "center",
                 justifyContent: "center",
-                flexDirection: "row",
-                gap: 8,
-                opacity: loading ? 0.7 : 1,
-                shadowColor: Colors.primary,
-                shadowOpacity: 0.2,
-                shadowRadius: 12,
-                elevation: 6,
+                opacity: submitting ? 0.7 : 1,
               }}
             >
-              {loading ? (
+              {submitting ? (
                 <ActivityIndicator color={Colors.onPrimary} />
               ) : (
                 <Text
                   style={{
                     color: Colors.onPrimary,
-                    fontWeight: "700",
+                    fontWeight: "800",
                     fontSize: 16,
+                    letterSpacing: 0.5,
                   }}
                 >
-                  {step === "summary"
-                    ? "Proceed to Payment ✓"
-                    : "Submit Order ✓"}
+                  Place Order
                 </Text>
               )}
             </LinearGradient>
@@ -550,6 +463,6 @@ export default function CheckoutScreen() {
           </TouchableOpacity>
         </View>
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 }

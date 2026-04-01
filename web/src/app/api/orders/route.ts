@@ -45,6 +45,8 @@ export async function GET(req: NextRequest) {
       menuSnapshot: orders.menuSnapshot,
       orderedAt: orders.orderedAt,
       confirmedAt: orders.confirmedAt,
+      cookingStartedAt: orders.cookingStartedAt,
+      outForDeliveryAt: orders.outForDeliveryAt,
       deliveredAt: orders.deliveredAt,
       updatedAt: orders.updatedAt,
       menu: {

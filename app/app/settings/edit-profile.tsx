@@ -17,6 +17,7 @@ import { Colors } from "@/constants/colors";
 import { getMe, updateMe } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
 import { CustomAlert } from "@/store/alert-store";
+import { useKeyboard } from "@/hooks/use-keyboard";
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function EditProfileScreen() {
   const [name, setName] = useState(user?.name ?? "");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { isKeyboardVisible, keyboardHeight } = useKeyboard();
 
   useEffect(() => {
     if (!user?.name) {
@@ -215,6 +217,9 @@ export default function EditProfileScreen() {
             </TouchableOpacity>
           </>
         )}
+        
+        {/* Dynamic spacer for keyboard */}
+        <View style={{ height: isKeyboardVisible ? keyboardHeight - 20 : 20 }} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

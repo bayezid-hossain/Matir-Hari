@@ -139,10 +139,13 @@ export type Order = {
   deliveryFee: number;
   trxId: string | null;
   paymentMethod: string | null;
+  paymentScreenshot: string | null;
   cutOffReached: boolean;
   deliveryDate: string | null;
   orderedAt: string;
   confirmedAt: string | null;
+  cookingStartedAt: string | null;
+  outForDeliveryAt: string | null;
   deliveredAt: string | null;
   menu: {
     id: string;
@@ -181,12 +184,38 @@ export async function createOrder(
 export async function submitPayment(
   orderId: string,
   trxId: string,
-  paymentMethod: "bKash" | "Nagad"
+  paymentMethod: "bKash" | "Nagad",
+  paymentScreenshot?: string
 ): Promise<Order> {
   return request(`/api/orders/${orderId}`, {
     method: "PATCH",
-    body: JSON.stringify({ action: "submit_payment", trxId, paymentMethod }),
+    body: JSON.stringify({ action: "submit_payment", trxId, paymentMethod, paymentScreenshot }),
   });
+}
+
+export async function uploadPaymentScreenshot(
+  uri: string
+): Promise<{ url: string }> {
+  const formData = new FormData();
+  // @ts-ignore - FormData expects { uri, name, type } on mobile
+  formData.append("file", {
+    uri,
+    name: `payment_${Date.now()}.jpg`,
+    type: "image/jpeg",
+  });
+
+  const token = await SecureStore.getItemAsync("auth_token");
+  const res = await fetch(`${BASE_URL}/api/orders/upload`, {
+    method: "POST",
+    body: formData,
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || "Upload failed");
+  return json;
 }
 
 export async function cancelOrder(

@@ -18,22 +18,25 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { getOrderById, cancelOrder, requestChange, type Order } from "@/lib/api";
 import { CustomAlert } from "@/store/alert-store";
+import { Ionicons } from "@expo/vector-icons";
+import { ReasonModal } from "@/components/ReasonModal";
+import { PaymentForm } from "@/components/PaymentForm";
 
 // ─── Timeline ────────────────────────────────────────────────────────────────
 
 type TimelineStage = {
   key: string;
   label: string;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   activeLabel?: string;
 };
 
 const STAGES: TimelineStage[] = [
-  { key: "orderedAt",        label: "Payment Submitted",    icon: "💳" },
-  { key: "confirmedAt",      label: "Verified",             icon: "✅", activeLabel: "Awaiting verification…" },
-  { key: "cookingStartedAt", label: "Cooking in Clay Pot",  icon: "🍲", activeLabel: "Slow-cooking your meal…" },
-  { key: "outForDeliveryAt", label: "Out for Delivery",     icon: "🛵", activeLabel: "On the way to you…" },
-  { key: "deliveredAt",      label: "Delivered",            icon: "🎉" },
+  { key: "orderedAt",        label: "Payment Submitted",    icon: "card-outline" },
+  { key: "confirmedAt",      label: "Verified",             icon: "checkmark-circle-outline", activeLabel: "Awaiting verification…" },
+  { key: "cookingStartedAt", label: "Cooking in Clay Pot",  icon: "flame-outline",            activeLabel: "Slow-cooking your meal…" },
+  { key: "outForDeliveryAt", label: "Handovered",           icon: "bicycle-outline",          activeLabel: "On the way to you…" },
+  { key: "deliveredAt",      label: "Delivered",            icon: "bag-check-outline" },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
@@ -116,9 +119,11 @@ function Timeline({ order }: { order: Order & Record<string, unknown> }) {
                   elevation: isDone ? 4 : 0,
                 }}
               >
-                <Text style={{ fontSize: isDone ? 14 : 16, color: isDone ? "#fff" : undefined }}>
-                  {isDone ? "✓" : stage.icon}
-                </Text>
+                <Ionicons
+                  name={isDone ? "checkmark" : stage.icon}
+                  size={isDone ? 18 : 16}
+                  color={isDone ? "#fff" : isCurrent ? Colors.primary : Colors.outline}
+                />
               </View>
 
               <View style={{ flex: 1, paddingTop: 2 }}>
@@ -160,146 +165,6 @@ function Timeline({ order }: { order: Order & Record<string, unknown> }) {
 
 // ─── Reason Modal ─────────────────────────────────────────────────────────────
 
-function ReasonModal({
-  visible,
-  title,
-  subtitle,
-  confirmLabel,
-  confirmColor,
-  onConfirm,
-  onDismiss,
-}: {
-  visible: boolean;
-  title: string;
-  subtitle: string;
-  confirmLabel: string;
-  confirmColor: string;
-  onConfirm: (reason: string) => void;
-  onDismiss: () => void;
-}) {
-  const [reason, setReason] = useState("");
-  const insets = useSafeAreaInsets();
-
-  const handleConfirm = () => {
-    if (!reason.trim()) {
-      CustomAlert.alert("Required", "Please enter a reason.");
-      return;
-    }
-    onConfirm(reason.trim());
-    setReason("");
-  };
-
-  const handleDismiss = () => {
-    setReason("");
-    onDismiss();
-  };
-
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={handleDismiss}
-    >
-      <TouchableOpacity
-        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }}
-        activeOpacity={1}
-        onPress={handleDismiss}
-      />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}
-      >
-        <View
-          style={{
-            backgroundColor: Colors.surface,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            paddingHorizontal: 24,
-            paddingTop: 24,
-            paddingBottom: insets.bottom + 24,
-            gap: 16,
-            shadowColor: "#000",
-            shadowOpacity: 0.15,
-            shadowRadius: 20,
-            elevation: 20,
-          }}
-        >
-          {/* Drag handle */}
-          <View
-            style={{
-              width: 36,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: Colors.outlineVariant,
-              alignSelf: "center",
-              marginBottom: 4,
-            }}
-          />
-
-          <Text style={{ fontSize: 18, fontWeight: "800", color: Colors.onSurface }}>
-            {title}
-          </Text>
-          <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant, lineHeight: 20 }}>
-            {subtitle}
-          </Text>
-
-          <TextInput
-            style={{
-              backgroundColor: Colors.surfaceContainerHigh,
-              borderRadius: 12,
-              padding: 14,
-              fontSize: 15,
-              color: Colors.onSurface,
-              minHeight: 80,
-              textAlignVertical: "top",
-            }}
-            placeholder="Enter reason…"
-            placeholderTextColor={Colors.outline}
-            value={reason}
-            onChangeText={setReason}
-            multiline
-            autoFocus
-          />
-
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            <TouchableOpacity
-              onPress={handleDismiss}
-              style={{
-                flex: 1,
-                height: 50,
-                borderRadius: 12,
-                backgroundColor: Colors.surfaceContainerHigh,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ color: Colors.onSurfaceVariant, fontWeight: "600", fontSize: 15 }}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleConfirm}
-              style={{
-                flex: 1,
-                height: 50,
-                borderRadius: 12,
-                backgroundColor: `${confirmColor}18`,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ color: confirmColor, fontWeight: "700", fontSize: 15 }}>
-                {confirmLabel}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
-  );
-}
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
@@ -366,7 +231,14 @@ export default function OrderDetailScreen() {
     }
   };
 
-  const statusColor = order ? (STATUS_COLORS[order.status] ?? Colors.outline) : Colors.outline;
+  const statusColor =
+    order?.status === "Cooking"
+      ? Colors.primary
+      : order?.status === "OutForDelivery"
+      ? "#2E7D32"
+      : order?.status === "PendingPayment"
+      ? Colors.secondary
+      : Colors.outline;
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.surface }}>
@@ -447,8 +319,45 @@ export default function OrderDetailScreen() {
             </View>
           </View>
 
+          {/* Payment missing warning */}
+          {order.status === "PendingPayment" && !order.trxId && (
+            <View
+              style={{
+                backgroundColor: `${Colors.secondary}14`,
+                borderRadius: 14,
+                padding: 16,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: `${Colors.secondary}30`,
+                flexDirection: "row",
+                alignItems: "flex-start",
+                gap: 12,
+              }}
+            >
+              <Ionicons name="warning-outline" size={22} color={Colors.secondary} style={{ marginTop: 1 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: Colors.secondary, marginBottom: 4 }}>
+                  Payment Not Submitted
+                </Text>
+                <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant, lineHeight: 19 }}>
+                  Your order is not confirmed yet. Please provide your bKash/Nagad Transaction ID below to complete the booking.
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Live timeline */}
           <Timeline order={order} />
+
+          {/* Inline payment form — shown when TrxID is missing */}
+          {order.status === "PendingPayment" && !order.trxId && (
+            <View style={{ marginTop: 16 }}>
+              <PaymentForm
+                orderId={id!}
+                onSuccess={load}
+              />
+            </View>
+          )}
 
           {/* Order meal card */}
           <View
@@ -633,6 +542,7 @@ export default function OrderDetailScreen() {
       {/* Request change modal */}
       <ReasonModal
         visible={modalType === "change"}
+        loading={actionLoading}
         title="Request Change"
         subtitle="Describe the change you need. The admin will review your request."
         confirmLabel="Send Request"

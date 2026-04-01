@@ -98,6 +98,7 @@ export const orders = pgTable("orders", {
   cutOffReached: boolean("cut_off_reached").notNull().default(false),
   cancelReason: text("cancel_reason"),
   adminNote: text("admin_note"),
+  paymentScreenshot: text("payment_screenshot"),
   // Timestamps for each stage
   orderedAt: timestamp("ordered_at").notNull().defaultNow(),
   paymentSubmittedAt: timestamp("payment_submitted_at"),

@@ -103,11 +103,12 @@ export async function PATCH(
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid JSON");
 
-  const { action, trxId, paymentMethod, cancelReason, isAdmin } =
+  const { action, trxId, paymentMethod, paymentScreenshot, cancelReason, isAdmin } =
     body as {
       action?: string;
       trxId?: string;
       paymentMethod?: string;
+      paymentScreenshot?: string;
       cancelReason?: string;
       isAdmin?: boolean;
     };
@@ -144,6 +145,7 @@ export async function PATCH(
         .set({
           trxId: trxId.trim(),
           paymentMethod: paymentMethod as "bKash" | "Nagad",
+          paymentScreenshot: paymentScreenshot?.trim() || null,
           paymentSubmittedAt: new Date(),
           cutOffReached,
           updatedAt: new Date(),

@@ -1,21 +1,5 @@
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
-import { useState } from "react";
-import { useRouter } from "expo-router";
-import MapView, { Marker, type Region } from "react-native-maps";
-import * as Location from "expo-location";
-import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
+import { useKeyboard } from "@/hooks/use-keyboard";
 import {
   getMe,
   updateMe,
@@ -23,6 +7,22 @@ import {
   type SavedLocation,
 } from "@/lib/api";
 import { CustomAlert } from "@/store/alert-store";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
+import MapView, { Marker, type Region, type PoiClickEvent } from "react-native-maps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRef } from "react";
 
 // Mymensingh city center
 const DEFAULT_LAT = 24.7471;
@@ -64,6 +64,7 @@ async function reverseGeocode(
 export default function LocationPickerScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const mapRef = useRef<MapView>(null);
 
   const [region, setRegion] = useState<Region>({
     latitude: DEFAULT_LAT,
@@ -79,15 +80,20 @@ export default function LocationPickerScreen() {
   const [geocoding, setGeocoding] = useState(false);
   const [label, setLabel] = useState("");
   const [locating, setLocating] = useState(false);
+  const { isKeyboardVisible, keyboardHeight } = useKeyboard();
   const [saving, setSaving] = useState(false);
 
-  const updatePin = async (latitude: number, longitude: number) => {
+  const updatePin = async (latitude: number, longitude: number, forcedName?: string) => {
     setMarkerCoord({ latitude, longitude });
     setGeocoding(true);
     const info = await reverseGeocode(latitude, longitude);
-    setGeocodeInfo(info);
+    
+    // If a forced name (like a POI name) is provided, use it instead of reverse geocoding result
+    const placeName = forcedName || info.placeName;
+    
+    setGeocodeInfo({ ...info, placeName });
     // Pre-fill label with place name only if user hasn't typed anything yet
-    setLabel((prev) => (prev.trim() ? prev : info.placeName));
+    setLabel((prev) => (prev.trim() ? prev : placeName));
     setGeocoding(false);
   };
 
@@ -113,7 +119,9 @@ export default function LocationPickerScreen() {
         accuracy: Location.Accuracy.High,
       });
       const { latitude, longitude } = pos.coords;
-      setRegion((r) => ({ ...r, latitude, longitude }));
+      const newRegion = { ...region, latitude, longitude };
+      setRegion(newRegion);
+      mapRef.current?.animateToRegion(newRegion, 1000);
       await updatePin(latitude, longitude);
     } catch {
       CustomAlert.alert("Error", "Could not get your current location.");
@@ -167,12 +175,7 @@ export default function LocationPickerScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={0}
-    >
-      <View style={{ flex: 1, backgroundColor: Colors.surface }}>
+    <View style={{ flex: 1, backgroundColor: Colors.surface }}>
         {/* Header */}
         <View
           style={{
@@ -193,10 +196,10 @@ export default function LocationPickerScreen() {
           <TouchableOpacity
             onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
           >
-            <Text style={{ color: Colors.primary, fontSize: 16, fontWeight: "600" }}>
-              ← Back
-            </Text>
+            <Ionicons name="chevron-back" size={20} color={Colors.primary} />
+            <Text style={{ color: Colors.primary, fontSize: 15, fontWeight: "600" }}>Back</Text>
           </TouchableOpacity>
           <Text style={{ fontSize: 18, fontWeight: "700", color: Colors.onSurface }}>
             Pick Location
@@ -207,10 +210,14 @@ export default function LocationPickerScreen() {
         {/* Map */}
         <View style={{ flex: 1 }}>
           <MapView
+            ref={mapRef}
             style={{ flex: 1 }}
             region={region}
-            onRegionChangeComplete={setRegion}
+            onRegionChangeComplete={(r) => setRegion(r)}
             showsUserLocation
+            showsMyLocationButton={false}
+            onPress={(e) => updatePin(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}
+            onPoiClick={(e) => updatePin(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude, e.nativeEvent.name)}
           >
             <Marker
               coordinate={markerCoord}
@@ -227,24 +234,25 @@ export default function LocationPickerScreen() {
             activeOpacity={0.85}
             style={{
               position: "absolute",
-              bottom: 16,
-              right: 16,
-              width: 48,
-              height: 48,
-              borderRadius: 24,
+              bottom: 10,
+              right: 10,
+              width: 54,
+              height: 54,
+              borderRadius: 27,
               backgroundColor: Colors.surface,
               alignItems: "center",
               justifyContent: "center",
               shadowColor: "#000",
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 6,
+              shadowOpacity: 0.2,
+              shadowRadius: 10,
+              elevation: 8,
+              zIndex: 20,
             }}
           >
             {locating ? (
               <ActivityIndicator size="small" color={Colors.primary} />
             ) : (
-              <Text style={{ fontSize: 22 }}>📍</Text>
+              <Ionicons name="locate" size={24} color={Colors.primary} />
             )}
           </TouchableOpacity>
         </View>
@@ -258,12 +266,12 @@ export default function LocationPickerScreen() {
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 18,
-            paddingBottom: insets.bottom + 20,
             backgroundColor: Colors.surface,
             shadowColor: Colors.primary,
             shadowOpacity: 0.08,
             shadowRadius: 20,
             elevation: 8,
+            paddingBottom: isKeyboardVisible ? keyboardHeight : insets.bottom + 20,
           }}
         >
           {/* Instruction */}
@@ -297,7 +305,7 @@ export default function LocationPickerScreen() {
                 <ActivityIndicator size="small" color={Colors.primary} />
               ) : (
                 <>
-                  <Text style={{ fontSize: 18, marginTop: 1 }}>📍</Text>
+                  <Ionicons name="location" size={20} color={Colors.primary} style={{ marginTop: 1 }} />
                   <View style={{ flex: 1 }}>
                     <Text
                       style={{
@@ -398,7 +406,6 @@ export default function LocationPickerScreen() {
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
-      </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

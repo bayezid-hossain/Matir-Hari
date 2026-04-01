@@ -16,6 +16,7 @@ import { Colors } from "@/constants/colors";
 import { register } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
 import { CustomAlert } from "@/store/alert-store";
+import { useKeyboard } from "@/hooks/use-keyboard";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function SignupScreen() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const { isKeyboardVisible, keyboardHeight } = useKeyboard();
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
@@ -205,6 +207,9 @@ export default function SignupScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Dynamic spacer for keyboard */}
+        <View style={{ height: isKeyboardVisible ? keyboardHeight - 40 : 20 }} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

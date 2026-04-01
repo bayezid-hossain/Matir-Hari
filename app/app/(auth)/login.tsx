@@ -16,6 +16,7 @@ import { Colors } from "@/constants/colors";
 import { login } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
 import { CustomAlert } from "@/store/alert-store";
+import { useKeyboard } from "@/hooks/use-keyboard";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { isKeyboardVisible, keyboardHeight } = useKeyboard();
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -182,6 +184,9 @@ export default function LoginScreen() {
             </Text>
           </Text>
         </View>
+        
+        {/* Dynamic spacer for keyboard */}
+        <View style={{ height: isKeyboardVisible ? keyboardHeight - 40 : 20 }} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
