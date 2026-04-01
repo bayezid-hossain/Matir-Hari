@@ -13,6 +13,13 @@ type Order = {
   deliveryFee: number;
   deliveryAddress: { address?: string; lat?: number; lng?: number } | null;
   paymentScreenshot: string | null;
+  quantity: number;
+  changeRequest: {
+    requestedQuantity: number;
+    reason: string;
+    requestedAt: string;
+    previousStatus: string;
+  } | null;
   orderedAt: string;
   paymentSubmittedAt: string | null;
   confirmedAt: string | null;
@@ -165,6 +172,43 @@ export function OrdersClient({ initialStatus }: { initialStatus?: string }) {
     }
 
     if (order.status === "PendingAdminAction") {
+      if (order.changeRequest) {
+        // Change request — show details + accept/reject
+        return (
+          <div className="flex flex-col items-end gap-1.5">
+            <div className="text-right">
+              <p className="text-[9px] uppercase font-bold tracking-wider text-on-surface-variant">
+                Change Request
+              </p>
+              <p className="text-xs font-bold text-primary">
+                Qty: {order.changeRequest.requestedQuantity} platters
+              </p>
+              <p className="text-[10px] text-on-surface-variant max-w-[180px] truncate">
+                {order.changeRequest.reason}
+              </p>
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => runAction(order.id, "accept_change")}
+                disabled={!!actionLoading}
+                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-tighter bg-green-700 text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+                title="Accept Change"
+              >
+                {actionLoading === order.id + "accept_change" ? "..." : "Accept"}
+              </button>
+              <button
+                onClick={() => runAction(order.id, "reject_change")}
+                disabled={!!actionLoading}
+                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-tighter bg-surface-container-high text-on-surface rounded-lg hover:bg-surface-container-highest disabled:opacity-50"
+                title="Reject Change"
+              >
+                {actionLoading === order.id + "reject_change" ? "..." : "Reject"}
+              </button>
+            </div>
+          </div>
+        );
+      }
+      // Cancellation or other admin action
       return (
         <>
           <button
@@ -374,7 +418,7 @@ export function OrdersClient({ initialStatus }: { initialStatus?: string }) {
                           {order.menu.name}
                         </p>
                         <p className="text-[10px] text-on-surface-variant">
-                          {order.menu.type} • ৳{order.totalPrice} total
+                          {order.menu.type}{order.quantity > 1 ? ` ×${order.quantity}` : ""} • ৳{order.totalPrice} total
                         </p>
                       </div>
                     </div>

@@ -33,6 +33,8 @@ export async function GET(req: NextRequest) {
       outForDeliveryAt: orders.outForDeliveryAt,
       deliveredAt: orders.deliveredAt,
       updatedAt: orders.updatedAt,
+      quantity: orders.quantity,
+      changeRequest: orders.changeRequest,
       user: {
         id: users.id,
         name: users.name,
@@ -75,6 +77,8 @@ export async function GET(req: NextRequest) {
         outForDeliveryAt: orders.outForDeliveryAt,
         deliveredAt: orders.deliveredAt,
         updatedAt: orders.updatedAt,
+        quantity: orders.quantity,
+        changeRequest: orders.changeRequest,
         user: {
           id: users.id,
           name: users.name,

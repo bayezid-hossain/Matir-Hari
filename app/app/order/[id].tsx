@@ -17,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { getOrderById, cancelOrder, requestChange, type Order } from "@/lib/api";
+import { ChangeRequestModal } from "@/components/ChangeRequestModal";
 import { CustomAlert } from "@/store/alert-store";
 import { Ionicons } from "@expo/vector-icons";
 import { ReasonModal } from "@/components/ReasonModal";
@@ -220,11 +221,11 @@ export default function OrderDetailScreen() {
     }
   };
 
-  const handleChangeConfirm = async (reason: string) => {
+  const handleChangeConfirm = async (reason: string, requestedQuantity?: number) => {
     setModalType(null);
     setActionLoading(true);
     try {
-      const updated = await requestChange(id!, reason);
+      const updated = await requestChange(id!, reason, requestedQuantity);
       setOrder(updated as Order & Record<string, unknown>);
       CustomAlert.alert("Submitted", "Your change request has been sent to admin.");
     } catch (e: unknown) {
@@ -331,6 +332,13 @@ export default function OrderDetailScreen() {
                       {order?.menu?.type}
                     </Text>
                   </View>
+                  {((order as any).quantity ?? 1) > 1 && (
+                    <View style={{ backgroundColor: `${Colors.primary}15`, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
+                      <Text style={{ fontSize: 10, fontWeight: "700", color: Colors.primary, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                        ×{(order as any).quantity}
+                      </Text>
+                    </View>
+                  )}
                   <View style={{ backgroundColor: `${statusColor}15`, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
                     <Text style={{ fontSize: 10, fontWeight: "700", color: statusColor, textTransform: "uppercase", letterSpacing: 0.8 }}>
                       {order.status as string}
@@ -380,7 +388,7 @@ export default function OrderDetailScreen() {
           </View>
 
           {/* Status-specific warning banners */}
-          {order.status === "PendingPayment" && !order.trxId && (
+          {order.status === "PendingPayment" && !order.trxId && !order.paymentScreenshot && (
             <View
               style={{
                 backgroundColor: `${Colors.secondary}14`,
@@ -549,27 +557,25 @@ export default function OrderDetailScreen() {
             gap: 10,
           }}
         >
-          {order.cutOffReached ? (
-            <TouchableOpacity
-              onPress={() => setModalType("change")}
-              disabled={actionLoading}
-              style={{
-                height: 52,
-                borderRadius: 12,
-                backgroundColor: Colors.surfaceContainerHigh,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {actionLoading ? (
-                <ActivityIndicator color={Colors.primary} />
-              ) : (
-                <Text style={{ color: Colors.primary, fontWeight: "700", fontSize: 15 }}>
-                  Request Change (Post Cut-off)
-                </Text>
-              )}
-            </TouchableOpacity>
-          ) : null}
+          <TouchableOpacity
+            onPress={() => setModalType("change")}
+            disabled={actionLoading}
+            style={{
+              height: 52,
+              borderRadius: 12,
+              backgroundColor: Colors.surfaceContainerHigh,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {actionLoading ? (
+              <ActivityIndicator color={Colors.primary} />
+            ) : (
+              <Text style={{ color: Colors.primary, fontWeight: "700", fontSize: 15 }}>
+                Request Change
+              </Text>
+            )}
+          </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setModalType("cancel")}
@@ -609,13 +615,10 @@ export default function OrderDetailScreen() {
       />
 
       {/* Request change modal */}
-      <ReasonModal
+      <ChangeRequestModal
         visible={modalType === "change"}
         loading={actionLoading}
-        title="Request Change"
-        subtitle="Describe the change you need. The admin will review your request."
-        confirmLabel="Send Request"
-        confirmColor={Colors.primary}
+        currentQuantity={(order as any)?.quantity ?? 1}
         onConfirm={handleChangeConfirm}
         onDismiss={() => setModalType(null)}
       />

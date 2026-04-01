@@ -257,6 +257,13 @@ function ActiveOrderCard({
                   {order.menu.type}
                 </Text>
               </View>
+              {((order as Order & Record<string, unknown>).quantity as number ?? 1) > 1 && (
+                <View style={{ backgroundColor: `${Colors.primary}12`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99, flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Text style={{ fontSize: 10, fontWeight: "700", color: Colors.primary, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                    ×{(order as Order & Record<string, unknown>).quantity as number}
+                  </Text>
+                </View>
+              )}
               <Text style={{ fontSize: 16, fontWeight: "800", color: Colors.primary, marginLeft: "auto" }}>
                 ৳{order.totalPrice}
               </Text>
@@ -266,7 +273,7 @@ function ActiveOrderCard({
       </TouchableOpacity>
 
       {/* Payment missing warning strip */}
-      {order.status === "PendingPayment" && !order.trxId && (
+      {order.status === "PendingPayment" && !order.trxId && !order.paymentScreenshot && (
         <TouchableOpacity
           onPress={() => router.push(`/order/${order.id}`)}
           activeOpacity={0.7}

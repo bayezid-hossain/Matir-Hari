@@ -58,6 +58,7 @@ export default function CheckoutScreen() {
   const [trxId, setTrxId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [selectedLocation, setSelectedLocation] = useState<SavedLocation | null>(
     null
   );
@@ -126,7 +127,8 @@ export default function CheckoutScreen() {
           lng: selectedLocation.lng,
           address: selectedLocation.address,
         },
-        isToday ? undefined : effectiveDate
+        isToday ? undefined : effectiveDate,
+        quantity
       );
       setOrderId(order.id);
       setStep("payment");
@@ -211,6 +213,57 @@ export default function CheckoutScreen() {
               <Text className="text-sm text-on-surface-variant leading-relaxed mb-4">
                 {menu.description}
               </Text>
+              {/* Quantity selector */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 14,
+                }}
+              >
+                <Text style={{ fontSize: 14, fontWeight: "600", color: Colors.onSurfaceVariant }}>
+                  Platters
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 0 }}>
+                  <TouchableOpacity
+                    onPress={() => setQuantity((q) => Math.max(1, q - 1))}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      backgroundColor: Colors.surfaceContainerHigh,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 20, fontWeight: "700", color: Colors.onSurface, lineHeight: 24 }}>−</Text>
+                  </TouchableOpacity>
+                  <View
+                    style={{
+                      width: 44,
+                      height: 36,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: "800", color: Colors.primary }}>{quantity}</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setQuantity((q) => Math.min(10, q + 1))}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      backgroundColor: Colors.surfaceContainerHigh,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 20, fontWeight: "700", color: Colors.onSurface, lineHeight: 24 }}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
               <Image
                 source={{
                   uri:
@@ -319,7 +372,7 @@ export default function CheckoutScreen() {
               <View className="flex-row justify-between">
                 <Text className="text-on-surface-variant">Meal Subtotal</Text>
                 <Text className="font-body-medium text-on-surface">
-                  ৳ {menu.price}.00
+                  ৳ {menu.price * quantity}.00
                 </Text>
               </View>
               <View className="flex-row justify-between">
@@ -347,7 +400,7 @@ export default function CheckoutScreen() {
                 </Text>
               </View>
               <Text className="text-[10px] text-on-surface-variant leading-snug">
-                *৳50 secures your slot. Remaining ৳{menu.price - 50 + 30}{" "}
+                *৳50 secures your slot. Remaining ৳{menu.price * quantity - 50 + 30}{" "}
                 payable on delivery.
               </Text>
             </View>

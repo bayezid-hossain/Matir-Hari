@@ -49,6 +49,9 @@ export async function GET(req: NextRequest) {
       outForDeliveryAt: orders.outForDeliveryAt,
       deliveredAt: orders.deliveredAt,
       updatedAt: orders.updatedAt,
+      paymentScreenshot: orders.paymentScreenshot,
+      quantity: orders.quantity,
+      changeRequest: orders.changeRequest,
       menu: {
         id: menus.id,
         name: menus.name,
@@ -84,11 +87,13 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid JSON");
 
-  const { menuId, deliveryAddress, deliveryDate } = body as {
+  const { menuId, deliveryAddress, deliveryDate, quantity: quantityRaw } = body as {
     menuId?: string;
     deliveryAddress?: unknown;
     deliveryDate?: string;
+    quantity?: number;
   };
+  const quantity = Math.max(1, Math.min(10, Number(quantityRaw) || 1));
 
   if (!menuId) return err("menuId is required");
   if (!deliveryAddress) return err("deliveryAddress is required");
@@ -177,13 +182,14 @@ export async function POST(req: NextRequest) {
     .values({
       userId: auth.sub,
       menuId,
-      totalPrice: menu.price,
+      totalPrice: menu.price * quantity,
       deliveryFee,
       commitmentFee: 50,
       deliveryAddress,
       deliveryDate: effectiveDate,
       menuSnapshot,
       cutOffReached: false,
+      quantity,
     })
     .returning();
 

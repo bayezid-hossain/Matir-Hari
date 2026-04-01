@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/admin-auth";
 import { db } from "@/db";
-import { orders, users } from "@/db/schema";
+import { orders, users, menus } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 export async function PATCH(
@@ -100,6 +100,50 @@ export async function PATCH(
       const [updated] = await db
         .update(orders)
         .set({ adminNote: adminNote ?? null, updatedAt: new Date() })
+        .where(eq(orders.id, id))
+        .returning();
+      return NextResponse.json({ data: updated });
+    }
+
+    case "accept_change": {
+      if (order.status !== "PendingAdminAction") {
+        return NextResponse.json({ error: "Order not in PendingAdminAction" }, { status: 400 });
+      }
+      const cr = order.changeRequest as { requestedQuantity?: number; previousStatus?: string } | null;
+      if (!cr?.requestedQuantity) {
+        return NextResponse.json({ error: "No pending change request found" }, { status: 400 });
+      }
+      const [menu] = await db.select({ price: menus.price }).from(menus).where(eq(menus.id, order.menuId)).limit(1);
+      const newQty = cr.requestedQuantity;
+      const newTotalPrice = menu ? menu.price * newQty : order.totalPrice;
+      const [updated] = await db
+        .update(orders)
+        .set({
+          quantity: newQty,
+          totalPrice: newTotalPrice,
+          changeRequest: null,
+          status: (cr.previousStatus ?? "Confirmed") as "PendingPayment" | "Confirmed" | "Cooking" | "OutForDelivery" | "Delivered" | "Cancelled" | "PendingAdminAction",
+          adminNote: adminNote ?? null,
+          updatedAt: new Date(),
+        })
+        .where(eq(orders.id, id))
+        .returning();
+      return NextResponse.json({ data: updated });
+    }
+
+    case "reject_change": {
+      if (order.status !== "PendingAdminAction") {
+        return NextResponse.json({ error: "Order not in PendingAdminAction" }, { status: 400 });
+      }
+      const cr2 = order.changeRequest as { previousStatus?: string } | null;
+      const [updated] = await db
+        .update(orders)
+        .set({
+          changeRequest: null,
+          status: (cr2?.previousStatus ?? "Confirmed") as "PendingPayment" | "Confirmed" | "Cooking" | "OutForDelivery" | "Delivered" | "Cancelled" | "PendingAdminAction",
+          adminNote: adminNote ?? null,
+          updatedAt: new Date(),
+        })
         .where(eq(orders.id, id))
         .returning();
       return NextResponse.json({ data: updated });

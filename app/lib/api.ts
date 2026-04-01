@@ -142,6 +142,13 @@ export type Order = {
   paymentScreenshot: string | null;
   cutOffReached: boolean;
   deliveryDate: string | null;
+  quantity: number;
+  changeRequest: {
+    requestedQuantity: number;
+    reason: string;
+    requestedAt: string;
+    previousStatus: string;
+  } | null;
   orderedAt: string;
   confirmedAt: string | null;
   cookingStartedAt: string | null;
@@ -169,7 +176,8 @@ export async function getOrders(): Promise<Order[]> {
 export async function createOrder(
   menuId: string,
   deliveryAddress: object,
-  deliveryDate?: string
+  deliveryDate?: string,
+  quantity = 1
 ): Promise<Order> {
   return request("/api/orders", {
     method: "POST",
@@ -177,6 +185,7 @@ export async function createOrder(
       menuId,
       deliveryAddress,
       ...(deliveryDate ? { deliveryDate } : {}),
+      ...(quantity > 1 ? { quantity } : {}),
     }),
   });
 }
@@ -251,11 +260,16 @@ export async function cancelOrder(
 
 export async function requestChange(
   orderId: string,
-  reason: string
+  cancelReason: string,
+  requestedQuantity?: number
 ): Promise<Order> {
   return request(`/api/orders/${orderId}`, {
     method: "PATCH",
-    body: JSON.stringify({ action: "request_change", cancelReason: reason }),
+    body: JSON.stringify({
+      action: "request_change",
+      cancelReason,
+      ...(requestedQuantity ? { requestedQuantity } : {}),
+    }),
   });
 }
 

@@ -60,6 +60,9 @@ export async function GET(
       outForDeliveryAt: orders.outForDeliveryAt,
       deliveredAt: orders.deliveredAt,
       updatedAt: orders.updatedAt,
+      paymentScreenshot: orders.paymentScreenshot,
+      quantity: orders.quantity,
+      changeRequest: orders.changeRequest,
       menu: {
         id: menus.id,
         name: menus.name,
@@ -110,13 +113,14 @@ export async function PATCH(
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid JSON");
 
-  const { action, trxId, paymentMethod, paymentScreenshot, cancelReason, isAdmin } =
+  const { action, trxId, paymentMethod, paymentScreenshot, cancelReason, requestedQuantity, isAdmin } =
     body as {
       action?: string;
       trxId?: string;
       paymentMethod?: string;
       paymentScreenshot?: string;
       cancelReason?: string;
+      requestedQuantity?: number;
       isAdmin?: boolean;
     };
 
@@ -221,17 +225,26 @@ export async function PATCH(
       return ok(updated);
     }
 
-    // ── Customer: request post-cutoff edit ────────────────────────────────────
+    // ── Customer: request change (quantity or other) ──────────────────────
     case "request_change": {
-      if (!menu || !isCutoffPassed(menu.type as "Lunch" | "Dinner"))
-        return err("Cut-off not yet reached; edit order directly");
+      if (["Delivered", "Cancelled"].includes(order.status))
+        return err("Cannot request changes on a delivered or cancelled order");
+
+      const reqQty = requestedQuantity
+        ? Math.max(1, Math.min(10, Number(requestedQuantity)))
+        : (order as any).quantity ?? 1;
 
       const [updated] = await db
         .update(orders)
         .set({
           status: "PendingAdminAction",
-          cancelReason: cancelReason ?? "Customer requested change",
-          cutOffReached: true,
+          changeRequest: {
+            requestedQuantity: reqQty,
+            reason: cancelReason ?? "Customer requested change",
+            requestedAt: new Date().toISOString(),
+            previousStatus: order.status,
+          },
+          cutOffReached: menu ? isCutoffPassed(menu.type as "Lunch" | "Dinner") : false,
           updatedAt: new Date(),
         })
         .where(eq(orders.id, id))
