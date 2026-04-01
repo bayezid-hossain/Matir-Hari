@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useState, useCallback } from "react";
 import { useRouter, useFocusEffect } from "expo-router";
+import MapView, { Marker } from "react-native-maps";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
@@ -17,6 +18,7 @@ import {
   type LocationData,
   type SavedLocation,
 } from "@/lib/api";
+import { CustomAlert } from "@/store/alert-store";
 
 function parseLocationData(raw: unknown): LocationData {
   if (raw && typeof raw === "object" && "locations" in raw) {
@@ -40,78 +42,119 @@ function LocationItem({
 }) {
   return (
     <View
-      className="bg-surface-container-lowest rounded-xl p-4 mb-3"
       style={{
+        borderRadius: 16,
+        marginBottom: 14,
+        overflow: "hidden",
         borderWidth: isActive ? 2 : 1,
-        borderColor: isActive
-          ? Colors.primary
-          : `${Colors.outlineVariant}40`,
+        borderColor: isActive ? Colors.primary : `${Colors.outlineVariant}50`,
         shadowColor: Colors.primary,
         shadowOpacity: isActive ? 0.1 : 0.04,
         shadowRadius: 12,
         elevation: isActive ? 3 : 1,
+        backgroundColor: Colors.surfaceContainerLowest,
       }}
     >
-      <View className="flex-row items-start justify-between mb-2">
-        <View className="flex-row items-center gap-2 flex-1">
-          <View
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 5,
-              backgroundColor: isActive ? Colors.primary : Colors.outlineVariant,
-            }}
+      {/* Mini map */}
+      <View style={{ height: 110, pointerEvents: "none" }}>
+        <MapView
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: loc.lat,
+            longitude: loc.lng,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+          }}
+          scrollEnabled={false}
+          zoomEnabled={false}
+          rotateEnabled={false}
+          pitchEnabled={false}
+          toolbarEnabled={false}
+          liteMode
+        >
+          <Marker
+            coordinate={{ latitude: loc.lat, longitude: loc.lng }}
+            pinColor={Colors.primary}
           />
-          <Text className="font-headline text-on-surface text-base">
-            {loc.label}
-          </Text>
-          {isActive && (
+        </MapView>
+      </View>
+
+      {/* Info row */}
+      <View style={{ padding: 14 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
             <View
-              className="px-2 rounded-full"
               style={{
-                paddingVertical: 2,
-                backgroundColor: `${Colors.primary}15`,
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: isActive ? Colors.primary : Colors.outlineVariant,
               }}
+            />
+            <Text
+              style={{
+                fontSize: 15,
+                fontWeight: "700",
+                color: Colors.onSurface,
+                flex: 1,
+              }}
+              numberOfLines={1}
             >
-              <Text
-                style={{ fontSize: 10, color: Colors.primary, fontWeight: "700" }}
+              {loc.label}
+            </Text>
+            {isActive && (
+              <View
+                style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  borderRadius: 20,
+                  backgroundColor: `${Colors.primary}15`,
+                }}
               >
-                Active
-              </Text>
-            </View>
+                <Text style={{ fontSize: 10, color: Colors.primary, fontWeight: "700" }}>
+                  Active
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {isSaving ? (
+            <ActivityIndicator size="small" color={Colors.primary} style={{ marginLeft: 8 }} />
+          ) : (
+            <TouchableOpacity
+              onPress={onDelete}
+              hitSlop={{ top: 8, bottom: 8, left: 12, right: 8 }}
+              style={{ marginLeft: 8 }}
+            >
+              <Text style={{ color: Colors.error, fontSize: 20, lineHeight: 22 }}>×</Text>
+            </TouchableOpacity>
           )}
         </View>
-        {isSaving ? (
-          <ActivityIndicator size="small" color={Colors.primary} />
-        ) : (
+
+        <Text
+          style={{
+            fontSize: 12,
+            color: Colors.onSurfaceVariant,
+            marginLeft: 18,
+            lineHeight: 17,
+          }}
+          numberOfLines={2}
+        >
+          {loc.address}
+        </Text>
+
+        {!isActive && (
           <TouchableOpacity
-            onPress={onDelete}
-            hitSlop={{ top: 8, bottom: 8, left: 12, right: 8 }}
+            onPress={onSetActive}
+            disabled={isSaving}
+            style={{ marginTop: 10, marginLeft: 18, alignSelf: "flex-start" }}
           >
-            <Text style={{ color: Colors.error, fontSize: 20, lineHeight: 22 }}>
-              ×
+            <Text style={{ fontSize: 13, fontWeight: "600", color: Colors.primary }}>
+              Set as active
             </Text>
           </TouchableOpacity>
         )}
       </View>
-      <Text
-        className="text-sm text-on-surface-variant"
-        style={{ marginLeft: 18 }}
-        numberOfLines={2}
-      >
-        {loc.address}
-      </Text>
-      {!isActive && (
-        <TouchableOpacity
-          onPress={onSetActive}
-          disabled={isSaving}
-          style={{ marginTop: 10, marginLeft: 18, alignSelf: "flex-start" }}
-        >
-          <Text className="text-sm font-body-semibold text-primary">
-            Set as active
-          </Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
@@ -131,7 +174,7 @@ export default function SavedLocationsScreen() {
       .then((profile) => {
         setLocationData(parseLocationData(profile.locationData));
       })
-      .catch(() => Alert.alert("Error", "Could not load saved locations"))
+      .catch(() => CustomAlert.alert("Error", "Could not load saved locations"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -149,25 +192,20 @@ export default function SavedLocationsScreen() {
       await updateMe({ locationData: updated });
       setLocationData(updated);
     } catch (e) {
-      Alert.alert(
-        "Error",
-        e instanceof Error ? e.message : "Failed to update."
-      );
+      CustomAlert.alert("Error", e instanceof Error ? e.message : "Failed to update.");
     } finally {
       setSavingId(null);
     }
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert("Delete Location", "Remove this saved location?", [
+    CustomAlert.alert("Delete Location", "Remove this saved location?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
-          const updatedLocations = locationData.locations.filter(
-            (l) => l.id !== id
-          );
+          const updatedLocations = locationData.locations.filter((l) => l.id !== id);
           const updatedActiveId =
             locationData.activeId === id
               ? (updatedLocations[0]?.id ?? null)
@@ -181,10 +219,7 @@ export default function SavedLocationsScreen() {
             await updateMe({ locationData: updated });
             setLocationData(updated);
           } catch (e) {
-            Alert.alert(
-              "Error",
-              e instanceof Error ? e.message : "Failed to delete."
-            );
+            CustomAlert.alert("Error", e instanceof Error ? e.message : "Failed to delete.");
           } finally {
             setSavingId(null);
           }
@@ -195,19 +230,22 @@ export default function SavedLocationsScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-surface justify-center items-center">
+      <View style={{ flex: 1, backgroundColor: Colors.surface, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View style={{ flex: 1, backgroundColor: Colors.surface }}>
       {/* Header */}
       <View
-        className="px-5 pb-4 flex-row items-center"
         style={{
           paddingTop: insets.top + 8,
+          paddingBottom: 14,
+          paddingHorizontal: 20,
+          flexDirection: "row",
+          alignItems: "center",
           backgroundColor: "rgba(251,249,245,0.97)",
           shadowColor: Colors.primary,
           shadowOpacity: 0.06,
@@ -216,30 +254,27 @@ export default function SavedLocationsScreen() {
         }}
       >
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          className="mr-4"
+          style={{ marginRight: 14 }}
         >
-          <Text className="text-primary font-body-semibold text-base">←</Text>
+          <Text style={{ color: Colors.primary, fontWeight: "600", fontSize: 16 }}>←</Text>
         </TouchableOpacity>
-        <Text className="text-lg font-headline text-on-surface">
+        <Text style={{ fontSize: 18, fontWeight: "700", color: Colors.onSurface }}>
           Saved Locations
         </Text>
       </View>
 
       <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          padding: 20,
-          paddingBottom: insets.bottom + 40,
-        }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Add new location button */}
         <TouchableOpacity
           onPress={() => router.push("/profile/location-picker")}
           activeOpacity={0.85}
-          className="mb-6"
+          style={{ marginBottom: 24 }}
         >
           <LinearGradient
             colors={[Colors.primary, Colors.primaryContainer]}
@@ -250,21 +285,13 @@ export default function SavedLocationsScreen() {
               borderRadius: 12,
               alignItems: "center",
               justifyContent: "center",
-              flexDirection: "row",
-              gap: 8,
               shadowColor: Colors.primary,
               shadowOpacity: 0.2,
               shadowRadius: 12,
               elevation: 6,
             }}
           >
-            <Text
-              style={{
-                color: Colors.onPrimary,
-                fontWeight: "700",
-                fontSize: 15,
-              }}
-            >
+            <Text style={{ color: Colors.onPrimary, fontWeight: "700", fontSize: 15 }}>
               + Add New Location
             </Text>
           </LinearGradient>
@@ -272,20 +299,34 @@ export default function SavedLocationsScreen() {
 
         {/* Location list */}
         {locationData.locations.length === 0 ? (
-          <View className="items-center py-16 gap-3">
-            <Text className="text-4xl">📍</Text>
-            <Text className="text-on-surface font-headline text-lg">
+          <View style={{ alignItems: "center", paddingVertical: 64, gap: 12 }}>
+            <Text style={{ fontSize: 40 }}>📍</Text>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: Colors.onSurface }}>
               No saved locations
             </Text>
-            <Text className="text-on-surface-variant text-sm text-center leading-relaxed px-4">
+            <Text
+              style={{
+                color: Colors.onSurfaceVariant,
+                fontSize: 14,
+                textAlign: "center",
+                lineHeight: 21,
+                paddingHorizontal: 16,
+              }}
+            >
               Add a delivery location to use when placing orders.
             </Text>
           </View>
         ) : (
           <>
             <Text
-              className="text-[11px] font-label uppercase text-on-surface-variant mb-3"
-              style={{ letterSpacing: 1.5 }}
+              style={{
+                fontSize: 11,
+                fontWeight: "700",
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+                color: Colors.onSurfaceVariant,
+                marginBottom: 12,
+              }}
             >
               Your Locations
             </Text>

@@ -10,7 +10,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
-import { getAuthUser } from "@/lib/auth";
 
 type Notification = {
   id: string;
@@ -99,7 +98,7 @@ export default function NotificationsScreen() {
         }}
       >
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")}
           style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.surfaceContainerLow, alignItems: "center", justifyContent: "center" }}
         >
           <Text style={{ fontSize: 18, color: Colors.onSurface }}>←</Text>

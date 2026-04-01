@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
 import { resetPassword } from "@/lib/api";
+import { CustomAlert } from "@/store/alert-store";
 
 export default function VerifyResetScreen() {
   const router = useRouter();
@@ -25,22 +26,22 @@ export default function VerifyResetScreen() {
 
   const handleReset = async () => {
     if (!otp.trim()) {
-      Alert.alert("Missing field", "Please enter the 4-digit code.");
+      CustomAlert.alert("Missing field", "Please enter the 4-digit code.");
       return;
     }
     if (password.length < 6) {
-      Alert.alert("Weak Password", "New password must be at least 6 characters.");
+      CustomAlert.alert("Weak Password", "New password must be at least 6 characters.");
       return;
     }
 
     setLoading(true);
     try {
       const { message } = await resetPassword(phone || "", password);
-      Alert.alert("Success", message || "Password has been successfully reset. Please login with your new password.", [
+      CustomAlert.alert("Success", message || "Password has been successfully reset. Please login with your new password.", [
         { text: "OK", onPress: () => router.replace("/(auth)/login") },
       ]);
     } catch (e: unknown) {
-      Alert.alert("Reset Failed", e instanceof Error ? e.message : "Something went wrong.");
+      CustomAlert.alert("Reset Failed", e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }

@@ -52,6 +52,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "expo-font",
     "expo-secure-store",
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission: "Allow Matir Hari to use your location to set delivery address.",
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

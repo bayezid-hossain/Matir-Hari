@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
 import { register } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
+import { CustomAlert } from "@/store/alert-store";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -26,10 +27,10 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    if (!name.trim()) return Alert.alert("Missing field", "Please enter your name.");
-    if (!phone.trim()) return Alert.alert("Missing field", "Please enter your phone number.");
-    if (password.length < 6) return Alert.alert("Weak password", "Password must be at least 6 characters.");
-    if (!agreed) return Alert.alert("Terms", "Please accept the Terms & Conditions.");
+    if (!name.trim()) return CustomAlert.alert("Missing field", "Please enter your name.");
+    if (!phone.trim()) return CustomAlert.alert("Missing field", "Please enter your phone number.");
+    if (password.length < 6) return CustomAlert.alert("Weak password", "Password must be at least 6 characters.");
+    if (!agreed) return CustomAlert.alert("Terms", "Please accept the Terms & Conditions.");
 
     setLoading(true);
     try {
@@ -37,7 +38,7 @@ export default function SignupScreen() {
       await setAuth(user, token);
       router.replace("/(tabs)");
     } catch (e: unknown) {
-      Alert.alert("Sign Up Failed", e instanceof Error ? e.message : "Something went wrong.");
+      CustomAlert.alert("Sign Up Failed", e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }

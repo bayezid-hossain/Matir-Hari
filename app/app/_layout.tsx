@@ -18,6 +18,7 @@ import {
   BeVietnamPro_600SemiBold,
 } from "@expo-google-fonts/be-vietnam-pro";
 import { useAuthStore } from "@/store/auth-store";
+import { GlobalAlert } from "@/components/ui/global-alert";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -67,6 +68,7 @@ export default function RootLayout() {
           options={{ presentation: "modal", animation: "slide_from_bottom" }}
         />
       </Stack>
+      <GlobalAlert />
     </>
   );
 }

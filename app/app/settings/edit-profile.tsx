@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { getMe, updateMe } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
+import { CustomAlert } from "@/store/alert-store";
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function EditProfileScreen() {
   }, []);
 
   const handleSave = async () => {
-    if (!name.trim()) return Alert.alert("Required", "Name cannot be empty.");
+    if (!name.trim()) return CustomAlert.alert("Required", "Name cannot be empty.");
     setSaving(true);
     try {
       const updated = await updateMe({ name: name.trim() });
@@ -43,9 +44,9 @@ export default function EditProfileScreen() {
       if (user && token) {
         await setAuth({ ...user, name: updated.name }, token);
       }
-      Alert.alert("Saved", "Your name has been updated.", [{ text: "OK", onPress: () => router.back() }]);
+      CustomAlert.alert("Saved", "Your name has been updated.", [{ text: "OK", onPress: () => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile") }]);
     } catch (e: unknown) {
-      Alert.alert("Error", e instanceof Error ? e.message : "Could not save.");
+      CustomAlert.alert("Error", e instanceof Error ? e.message : "Could not save.");
     } finally {
       setSaving(false);
     }
@@ -73,7 +74,7 @@ export default function EditProfileScreen() {
         }}
       >
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")}
           style={{
             width: 40,
             height: 40,

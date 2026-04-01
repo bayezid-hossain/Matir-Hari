@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
 import { getMe, updateMe } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
+import { CustomAlert } from "@/store/alert-store";
 
 export default function PersonalInfoScreen() {
   const router = useRouter();
@@ -31,14 +32,14 @@ export default function PersonalInfoScreen() {
         setPhone(profile.phone);
       })
       .catch(() => {
-        Alert.alert("Error", "Could not load profile");
+        CustomAlert.alert("Error", "Could not load profile");
       })
       .finally(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Error", "Name cannot be empty");
+      CustomAlert.alert("Error", "Name cannot be empty");
       return;
     }
 
@@ -49,11 +50,11 @@ export default function PersonalInfoScreen() {
       if (token) {
         setAuth(updated, token);
       }
-      Alert.alert("Success", "Personal info updated successfully", [
-        { text: "OK", onPress: () => router.back() },
+      CustomAlert.alert("Success", "Personal info updated successfully", [
+        { text: "OK", onPress: () => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile") },
       ]);
     } catch (e: unknown) {
-      Alert.alert("Update Failed", e instanceof Error ? e.message : "Something went wrong.");
+      CustomAlert.alert("Update Failed", e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setSaving(false);
     }
@@ -179,7 +180,7 @@ export default function PersonalInfoScreen() {
             Changed your mind?{" "}
             <Text
               className="text-primary font-body-semibold"
-              onPress={() => router.back()}
+              onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")}
             >
               Go Back
             </Text>

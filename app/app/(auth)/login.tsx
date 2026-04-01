@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
 import { login } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
+import { CustomAlert } from "@/store/alert-store";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!phone.trim() || !password) {
-      Alert.alert("Missing fields", "Please enter your phone number and password.");
+      CustomAlert.alert("Missing fields", "Please enter your phone number and password.");
       return;
     }
     setLoading(true);
@@ -35,7 +36,7 @@ export default function LoginScreen() {
       await setAuth(user, token);
       router.replace("/(tabs)");
     } catch (e: unknown) {
-      Alert.alert("Login Failed", e instanceof Error ? e.message : "Something went wrong.");
+      CustomAlert.alert("Login Failed", e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }

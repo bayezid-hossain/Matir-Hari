@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
+import { CustomAlert } from "@/store/alert-store";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function ForgotPasswordScreen() {
 
   const handleNext = () => {
     if (!phone.trim()) {
-      Alert.alert("Missing field", "Please enter your registered phone number.");
+      CustomAlert.alert("Missing field", "Please enter your registered phone number.");
       return;
     }
     
@@ -129,7 +130,7 @@ export default function ForgotPasswordScreen() {
             Remembered your password?{" "}
             <Text
               className="text-primary font-body-semibold"
-              onPress={() => router.back()}
+              onPress={() => router.canGoBack() ? router.back() : router.replace("/(auth)/login")}
             >
               Login
             </Text>

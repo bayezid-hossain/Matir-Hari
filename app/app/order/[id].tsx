@@ -6,6 +6,10 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  TextInput,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -13,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { getOrderById, cancelOrder, requestChange, type Order } from "@/lib/api";
+import { CustomAlert } from "@/store/alert-store";
 
 // ─── Timeline ────────────────────────────────────────────────────────────────
 
@@ -44,27 +49,39 @@ const STATUS_COLORS: Record<string, string> = {
 function Timeline({ order }: { order: Order & Record<string, unknown> }) {
   return (
     <View
-      className="bg-surface-container-low rounded-2xl p-6"
-      style={{ shadowColor: Colors.primary, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2 }}
+      style={{
+        backgroundColor: Colors.surfaceContainerLow,
+        borderRadius: 16,
+        padding: 24,
+        shadowColor: Colors.primary,
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
+        elevation: 2,
+      }}
     >
-      {/* Decorative blob */}
       <View
-        className="absolute top-0 right-0 w-28 h-28 rounded-full"
-        style={{ backgroundColor: `${Colors.primary}06`, marginRight: -14, marginTop: -14 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: 112,
+          height: 112,
+          borderRadius: 56,
+          backgroundColor: `${Colors.primary}06`,
+          marginRight: -14,
+          marginTop: -14,
+        }}
       />
       {STAGES.map((stage, i) => {
         const ts = order[stage.key] as string | null | undefined;
         const isDone = Boolean(ts);
-        // A stage is "current" when previous stages are done but this one isn't
         const isCurrent =
           !isDone &&
-          (i === 0 ||
-            STAGES.slice(0, i).every((s) => Boolean(order[s.key])));
+          (i === 0 || STAGES.slice(0, i).every((s) => Boolean(order[s.key])));
         const isUpcoming = !isDone && !isCurrent;
 
         return (
           <View key={stage.key} style={{ marginBottom: i < STAGES.length - 1 ? 28 : 0 }}>
-            {/* Connector line */}
             {i < STAGES.length - 1 && (
               <View
                 style={{
@@ -79,7 +96,6 @@ function Timeline({ order }: { order: Order & Record<string, unknown> }) {
               />
             )}
             <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 16 }}>
-              {/* Dot */}
               <View
                 style={{
                   width: 40,
@@ -105,17 +121,12 @@ function Timeline({ order }: { order: Order & Record<string, unknown> }) {
                 </Text>
               </View>
 
-              {/* Label */}
               <View style={{ flex: 1, paddingTop: 2 }}>
                 <Text
                   style={{
                     fontSize: isCurrent ? 16 : 14,
                     fontWeight: isCurrent ? "700" : "600",
-                    color: isCurrent
-                      ? Colors.primary
-                      : isDone
-                      ? Colors.onSurface
-                      : Colors.outline,
+                    color: isCurrent ? Colors.primary : isDone ? Colors.onSurface : Colors.outline,
                   }}
                 >
                   {stage.label}
@@ -147,6 +158,149 @@ function Timeline({ order }: { order: Order & Record<string, unknown> }) {
   );
 }
 
+// ─── Reason Modal ─────────────────────────────────────────────────────────────
+
+function ReasonModal({
+  visible,
+  title,
+  subtitle,
+  confirmLabel,
+  confirmColor,
+  onConfirm,
+  onDismiss,
+}: {
+  visible: boolean;
+  title: string;
+  subtitle: string;
+  confirmLabel: string;
+  confirmColor: string;
+  onConfirm: (reason: string) => void;
+  onDismiss: () => void;
+}) {
+  const [reason, setReason] = useState("");
+  const insets = useSafeAreaInsets();
+
+  const handleConfirm = () => {
+    if (!reason.trim()) {
+      CustomAlert.alert("Required", "Please enter a reason.");
+      return;
+    }
+    onConfirm(reason.trim());
+    setReason("");
+  };
+
+  const handleDismiss = () => {
+    setReason("");
+    onDismiss();
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={handleDismiss}
+    >
+      <TouchableOpacity
+        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }}
+        activeOpacity={1}
+        onPress={handleDismiss}
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}
+      >
+        <View
+          style={{
+            backgroundColor: Colors.surface,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            paddingHorizontal: 24,
+            paddingTop: 24,
+            paddingBottom: insets.bottom + 24,
+            gap: 16,
+            shadowColor: "#000",
+            shadowOpacity: 0.15,
+            shadowRadius: 20,
+            elevation: 20,
+          }}
+        >
+          {/* Drag handle */}
+          <View
+            style={{
+              width: 36,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: Colors.outlineVariant,
+              alignSelf: "center",
+              marginBottom: 4,
+            }}
+          />
+
+          <Text style={{ fontSize: 18, fontWeight: "800", color: Colors.onSurface }}>
+            {title}
+          </Text>
+          <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant, lineHeight: 20 }}>
+            {subtitle}
+          </Text>
+
+          <TextInput
+            style={{
+              backgroundColor: Colors.surfaceContainerHigh,
+              borderRadius: 12,
+              padding: 14,
+              fontSize: 15,
+              color: Colors.onSurface,
+              minHeight: 80,
+              textAlignVertical: "top",
+            }}
+            placeholder="Enter reason…"
+            placeholderTextColor={Colors.outline}
+            value={reason}
+            onChangeText={setReason}
+            multiline
+            autoFocus
+          />
+
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <TouchableOpacity
+              onPress={handleDismiss}
+              style={{
+                flex: 1,
+                height: 50,
+                borderRadius: 12,
+                backgroundColor: Colors.surfaceContainerHigh,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: Colors.onSurfaceVariant, fontWeight: "600", fontSize: 15 }}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleConfirm}
+              style={{
+                flex: 1,
+                height: 50,
+                borderRadius: 12,
+                backgroundColor: `${confirmColor}18`,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: confirmColor, fontWeight: "700", fontSize: 15 }}>
+                {confirmLabel}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 export default function OrderDetailScreen() {
@@ -156,6 +310,7 @@ export default function OrderDetailScreen() {
   const [order, setOrder] = useState<(Order & Record<string, unknown>) | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [modalType, setModalType] = useState<"cancel" | "change" | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -163,7 +318,7 @@ export default function OrderDetailScreen() {
       const data = await getOrderById(id);
       setOrder(data as Order & Record<string, unknown>);
     } catch {
-      Alert.alert("Error", "Could not load order.");
+      CustomAlert.alert("Error", "Could not load order.");
     } finally {
       setLoading(false);
     }
@@ -171,68 +326,44 @@ export default function OrderDetailScreen() {
 
   useEffect(() => {
     load();
-    // Poll every 15 s for live updates while screen is open
     const interval = setInterval(load, 15_000);
     return () => clearInterval(interval);
   }, [load]);
 
-  const isActive =
-    order &&
-    ["PendingPayment", "Confirmed", "Cooking", "OutForDelivery", "PendingAdminAction"].includes(
-      order.status
-    );
-
   const canCancel =
-    order &&
-    !["Delivered", "Cancelled"].includes(order.status);
+    order && !["Delivered", "Cancelled"].includes(order.status);
 
-  const handleCancel = () => {
-    Alert.prompt(
-      "Cancel Order",
-      order?.cutOffReached
-        ? "Cut-off has passed. Your cancellation will be sent to the admin for review. Please provide a reason:"
-        : "Please provide a reason for cancellation:",
-      async (reason) => {
-        if (!reason?.trim()) return;
-        setActionLoading(true);
-        try {
-          const updated = await cancelOrder(id!, reason);
-          setOrder(updated as Order & Record<string, unknown>);
-          Alert.alert(
-            "Done",
-            order?.cutOffReached
-              ? "Cancellation request sent to admin."
-              : "Order cancelled successfully."
-          );
-        } catch (e: unknown) {
-          Alert.alert("Error", e instanceof Error ? e.message : "Failed.");
-        } finally {
-          setActionLoading(false);
-        }
-      },
-      "plain-text"
-    );
+  const handleCancelConfirm = async (reason: string) => {
+    setModalType(null);
+    setActionLoading(true);
+    try {
+      const updated = await cancelOrder(id!, reason);
+      setOrder(updated as Order & Record<string, unknown>);
+      CustomAlert.alert(
+        "Done",
+        order?.cutOffReached
+          ? "Cancellation request sent to admin."
+          : "Order cancelled successfully."
+      );
+    } catch (e: unknown) {
+      CustomAlert.alert("Error", e instanceof Error ? e.message : "Failed.");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleRequestChange = () => {
-    Alert.prompt(
-      "Request Change",
-      "Describe the change you need. Admin will review:",
-      async (reason) => {
-        if (!reason?.trim()) return;
-        setActionLoading(true);
-        try {
-          const updated = await requestChange(id!, reason);
-          setOrder(updated as Order & Record<string, unknown>);
-          Alert.alert("Submitted", "Your change request has been sent to admin.");
-        } catch (e: unknown) {
-          Alert.alert("Error", e instanceof Error ? e.message : "Failed.");
-        } finally {
-          setActionLoading(false);
-        }
-      },
-      "plain-text"
-    );
+  const handleChangeConfirm = async (reason: string) => {
+    setModalType(null);
+    setActionLoading(true);
+    try {
+      const updated = await requestChange(id!, reason);
+      setOrder(updated as Order & Record<string, unknown>);
+      CustomAlert.alert("Submitted", "Your change request has been sent to admin.");
+    } catch (e: unknown) {
+      CustomAlert.alert("Error", e instanceof Error ? e.message : "Failed.");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const statusColor = order ? (STATUS_COLORS[order.status] ?? Colors.outline) : Colors.outline;
@@ -256,7 +387,7 @@ export default function OrderDetailScreen() {
         }}
       >
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/history")}
           style={{
             width: 40,
             height: 40,
@@ -278,7 +409,7 @@ export default function OrderDetailScreen() {
         <ActivityIndicator color={Colors.primary} size="large" style={{ marginTop: 60 }} />
       ) : !order ? null : (
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 120 }}
+          contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
           showsVerticalScrollIndicator={false}
         >
           {/* Status banner */}
@@ -303,7 +434,7 @@ export default function OrderDetailScreen() {
                   ? "Awaiting Payment"
                   : order.status === "PendingAdminAction"
                   ? "Pending Admin Review"
-                  : order.status}
+                  : order.status as string}
               </Text>
             </View>
             <View style={{ alignItems: "flex-end" }}>
@@ -359,7 +490,7 @@ export default function OrderDetailScreen() {
                   </View>
                   <View style={{ backgroundColor: `${statusColor}15`, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
                     <Text style={{ fontSize: 10, fontWeight: "700", color: statusColor, textTransform: "uppercase", letterSpacing: 0.8 }}>
-                      {order.status}
+                      {order.status as string}
                     </Text>
                   </View>
                 </View>
@@ -371,7 +502,7 @@ export default function OrderDetailScreen() {
           </View>
 
           {/* Payment info */}
-          {order.trxId && (
+          {!!order.trxId && (
             <View
               style={{
                 backgroundColor: Colors.surfaceContainerLow,
@@ -408,7 +539,7 @@ export default function OrderDetailScreen() {
           )}
 
           {/* Admin note */}
-          {order.adminNote && (
+          {!!order.adminNote && (
             <View
               style={{ backgroundColor: `${Colors.secondary}10`, borderRadius: 12, padding: 14, marginTop: 12, flexDirection: "row", gap: 10 }}
             >
@@ -442,7 +573,7 @@ export default function OrderDetailScreen() {
         >
           {order.cutOffReached ? (
             <TouchableOpacity
-              onPress={handleRequestChange}
+              onPress={() => setModalType("change")}
               disabled={actionLoading}
               style={{
                 height: 52,
@@ -463,7 +594,7 @@ export default function OrderDetailScreen() {
           ) : null}
 
           <TouchableOpacity
-            onPress={handleCancel}
+            onPress={() => setModalType("cancel")}
             disabled={actionLoading}
             style={{
               height: 52,
@@ -483,6 +614,32 @@ export default function OrderDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Cancel modal */}
+      <ReasonModal
+        visible={modalType === "cancel"}
+        title={order?.cutOffReached ? "Request Cancellation" : "Cancel Order"}
+        subtitle={
+          order?.cutOffReached
+            ? "Cut-off has passed. Your cancellation will be reviewed by the admin. Please provide a reason:"
+            : "Please provide a reason for cancellation:"
+        }
+        confirmLabel={order?.cutOffReached ? "Send Request" : "Cancel Order"}
+        confirmColor={Colors.error}
+        onConfirm={handleCancelConfirm}
+        onDismiss={() => setModalType(null)}
+      />
+
+      {/* Request change modal */}
+      <ReasonModal
+        visible={modalType === "change"}
+        title="Request Change"
+        subtitle="Describe the change you need. The admin will review your request."
+        confirmLabel="Send Request"
+        confirmColor={Colors.primary}
+        onConfirm={handleChangeConfirm}
+        onDismiss={() => setModalType(null)}
+      />
     </View>
   );
 }

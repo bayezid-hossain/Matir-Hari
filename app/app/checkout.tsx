@@ -24,6 +24,7 @@ import {
   type SavedLocation,
   type LocationData,
 } from "@/lib/api";
+import { CustomAlert } from "@/store/alert-store";
 
 const BKASH_NUMBER = "017XX-XXXXXX"; // Replace in production
 
@@ -95,7 +96,7 @@ export default function CheckoutScreen() {
     if (!menuId) return;
 
     if (!selectedLocation) {
-      Alert.alert(
+      CustomAlert.alert(
         "No Delivery Location",
         "Please add a delivery location before placing an order.",
         [
@@ -123,7 +124,7 @@ export default function CheckoutScreen() {
       setOrderId(order.id);
       setStep("payment");
     } catch (e: unknown) {
-      Alert.alert(
+      CustomAlert.alert(
         "Error",
         e instanceof Error ? e.message : "Failed to place order."
       );
@@ -135,13 +136,13 @@ export default function CheckoutScreen() {
   const handleSubmitPayment = async () => {
     if (!orderId) return;
     if (!trxId.trim())
-      return Alert.alert("Missing TrxID", "Please enter your Transaction ID.");
+      return CustomAlert.alert("Missing TrxID", "Please enter your Transaction ID.");
     setLoading(true);
     try {
       await submitPayment(orderId, trxId.trim(), paymentMethod);
       setStep("done");
     } catch (e: unknown) {
-      Alert.alert(
+      CustomAlert.alert(
         "Error",
         e instanceof Error ? e.message : "Failed to submit payment."
       );
@@ -161,7 +162,7 @@ export default function CheckoutScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-surface"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       {/* Header */}
       <View
@@ -541,7 +542,7 @@ export default function CheckoutScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             className="items-center mt-4"
-            onPress={() => router.back()}
+            onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)")}
           >
             <Text className="text-on-surface-variant font-body-medium text-sm">
               ← Back to Menu

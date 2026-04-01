@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { getNotifications, markNotificationsRead, Notification } from "@/lib/api";
+import { CustomAlert } from "@/store/alert-store";
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
@@ -27,7 +28,7 @@ export default function NotificationsScreen() {
         await markNotificationsRead().catch(() => {});
       }
     } catch (e) {
-      Alert.alert("Error", "Could not load notifications");
+      CustomAlert.alert("Error", "Could not load notifications");
     } finally {
       setLoading(false);
     }

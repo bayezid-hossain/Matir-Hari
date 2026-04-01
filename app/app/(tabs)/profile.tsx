@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/colors";
 import { getMe, type UserProfile } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
+import { CustomAlert } from "@/store/alert-store";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -70,7 +71,7 @@ export default function ProfileScreen() {
   }, []);
 
   const handleLogout = () => {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
+    CustomAlert.alert("Log Out", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Log Out",
