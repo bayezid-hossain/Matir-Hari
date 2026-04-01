@@ -1,17 +1,17 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
-import { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { getMe, type UserProfile } from "@/lib/api";
 import { useAuthStore } from "@/store/auth-store";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TrustScoreRing({ score, total = 5 }: { score: number; total?: number }) {
   const pct = Math.min(score / total, 1);
@@ -137,7 +137,7 @@ export default function ProfileScreen() {
                 </View>
               </View>
               <Text className="text-3xl font-headline-extra text-on-surface" style={{ letterSpacing: -0.5 }}>{displayName}</Text>
-              <Text className="text-on-surface-variant font-body-medium">{displayPhone}</Text>
+              <Text className="text-on-surface-variant font-body-medium">+880{displayPhone}</Text>
             </View>
 
             {/* Trust score card */}

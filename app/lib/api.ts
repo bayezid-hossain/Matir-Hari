@@ -3,6 +3,13 @@ import * as SecureStore from "expo-secure-store";
 const BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 
+/** Convert server-relative image paths to absolute URLs for mobile use. */
+function resolveImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 async function getToken(): Promise<string | null> {
   return SecureStore.getItemAsync("auth_token");
 }
@@ -83,14 +90,44 @@ export type MenuEntry = {
 
 export type TodayMenus = {
   date: string;
+  requestedDate: string;
   bdt: { hour: number; minute: number };
   lunch: MenuEntry | null;
   dinner: MenuEntry | null;
 };
 
-export async function getTodayMenus(): Promise<TodayMenus> {
-  return request("/api/menus/today");
+function fixMenuImageUrls(data: TodayMenus): TodayMenus {
+  return {
+    ...data,
+    lunch: data.lunch ? { ...data.lunch, imageUrl: resolveImageUrl(data.lunch.imageUrl) } : null,
+    dinner: data.dinner ? { ...data.dinner, imageUrl: resolveImageUrl(data.dinner.imageUrl) } : null,
+  };
 }
+
+export async function getTodayMenus(): Promise<TodayMenus> {
+  const data = await request<TodayMenus>("/api/menus/today");
+  return fixMenuImageUrls(data);
+}
+
+export async function getMenusByDate(date: string): Promise<TodayMenus> {
+  const data = await request<TodayMenus>(`/api/menus/today?date=${encodeURIComponent(date)}`);
+  return fixMenuImageUrls(data);
+}
+
+// ─── Location ─────────────────────────────────────────────────────────────────
+
+export type SavedLocation = {
+  id: string;
+  label: string;
+  address: string;
+  lat: number;
+  lng: number;
+};
+
+export type LocationData = {
+  locations: SavedLocation[];
+  activeId: string | null;
+};
 
 // ─── Orders ───────────────────────────────────────────────────────────────────
 
@@ -103,6 +140,7 @@ export type Order = {
   trxId: string | null;
   paymentMethod: string | null;
   cutOffReached: boolean;
+  deliveryDate: string | null;
   orderedAt: string;
   confirmedAt: string | null;
   deliveredAt: string | null;
@@ -116,17 +154,27 @@ export type Order = {
   };
 };
 
+function fixOrderImageUrl(order: Order): Order {
+  return { ...order, menu: { ...order.menu, imageUrl: resolveImageUrl(order.menu.imageUrl) } };
+}
+
 export async function getOrders(): Promise<Order[]> {
-  return request("/api/orders");
+  const data = await request<Order[]>("/api/orders");
+  return data.map(fixOrderImageUrl);
 }
 
 export async function createOrder(
   menuId: string,
-  deliveryAddress: object
+  deliveryAddress: object,
+  deliveryDate?: string
 ): Promise<Order> {
   return request("/api/orders", {
     method: "POST",
-    body: JSON.stringify({ menuId, deliveryAddress }),
+    body: JSON.stringify({
+      menuId,
+      deliveryAddress,
+      ...(deliveryDate ? { deliveryDate } : {}),
+    }),
   });
 }
 
@@ -162,13 +210,14 @@ export async function requestChange(
 }
 
 export async function getOrderById(orderId: string): Promise<Order> {
-  return request(`/api/orders/${orderId}`);
+  const data = await request<Order>(`/api/orders/${orderId}`);
+  return fixOrderImageUrl(data);
 }
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 export type UserProfile = AuthUser & {
-  locationData: object | null;
+  locationData: LocationData | null;
   createdAt: string;
   perks: {
     codUnlocked: boolean;
@@ -182,7 +231,7 @@ export async function getMe(): Promise<UserProfile> {
 }
 
 export async function updateMe(
-  updates: { name?: string; locationData?: object }
+  updates: { name?: string; locationData?: LocationData }
 ): Promise<UserProfile> {
   return request("/api/users/me", {
     method: "PATCH",

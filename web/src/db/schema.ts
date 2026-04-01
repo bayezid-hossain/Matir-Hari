@@ -36,7 +36,8 @@ export const users = pgTable("users", {
   phone: text("phone").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   trustScore: integer("trust_score").notNull().default(0),
-  // Stored as { lat, lng, address }
+  // Stored as LocationData: { locations: SavedLocation[], activeId: string | null }
+  // Legacy rows may store { address, lat, lng } — treat those as empty.
   locationData: json("location_data"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -89,6 +90,8 @@ export const orders = pgTable("orders", {
   deliveryFee: integer("delivery_fee").notNull().default(30),
   // { lat, lng, address }
   deliveryAddress: json("delivery_address"),
+  // "YYYY-MM-DD" BDT. null = legacy same-day order.
+  deliveryDate: text("delivery_date"),
   cutOffReached: boolean("cut_off_reached").notNull().default(false),
   cancelReason: text("cancel_reason"),
   adminNote: text("admin_note"),
@@ -99,6 +102,21 @@ export const orders = pgTable("orders", {
   cookingStartedAt: timestamp("cooking_started_at"),
   outForDeliveryAt: timestamp("out_for_delivery_at"),
   deliveredAt: timestamp("delivered_at"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── App Settings ─────────────────────────────────────────────────────────────
+// Key-value store for global configuration. Keys:
+//   delivery_fee_mode    : "fixed" | "auto"
+//   delivery_fee_fixed   : integer string (BDT) — used when mode = fixed
+//   delivery_fee_base    : integer string (BDT) — base fee for auto mode
+//   delivery_fee_per_km  : integer string (BDT per km) — for auto mode
+//   kitchen_lat          : decimal string — for distance calculation in auto mode
+//   kitchen_lng          : decimal string
+
+export const settings = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npx next:*)",
+      "Bash(npx eslint:*)",
+      "Bash(ls \"c:\\\\Users\\\\amiba\\\\Projects\\\\Matir Hari\\\\web\\\\src\\\\app\\\\admin\\\\\\(portal\\)\")",
+      "Bash(ls \"c:\\\\Users\\\\amiba\\\\Projects\\\\Matir Hari\\\\web\\\\src\\\\app\\\\admin\\\\\\(portal\\)\\\\menus\")"
+    ]
+  }
+}

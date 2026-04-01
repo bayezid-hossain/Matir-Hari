@@ -8,6 +8,7 @@ const NAV = [
   { href: "/admin/orders", label: "Orders", icon: "shopping_cart" },
   { href: "/admin/menus", label: "Menus", icon: "restaurant_menu" },
   { href: "/admin/manifest", label: "Manifest", icon: "assignment" },
+  { href: "/admin/settings", label: "Settings", icon: "settings" },
 ];
 
 export function AdminSidebar({ 

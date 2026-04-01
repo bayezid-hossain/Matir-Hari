@@ -59,6 +59,13 @@ export default function RootLayout() {
           options={{ presentation: "modal", animation: "slide_from_bottom" }}
         />
         <Stack.Screen name="order/[id]" />
+        <Stack.Screen name="profile/saved-locations" />
+        <Stack.Screen name="profile/personal-info" />
+        <Stack.Screen name="profile/notifications" />
+        <Stack.Screen
+          name="profile/location-picker"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
       </Stack>
     </>
   );

@@ -4,6 +4,23 @@ import { db } from "@/db";
 import { orders, menus } from "@/db/schema";
 import { getAuthUser } from "@/lib/auth";
 import { ok, created, err, unauthorized } from "@/lib/response";
+import { getAppSettings } from "@/app/api/admin/settings/route";
+
+/** Haversine distance between two lat/lng points in km. */
+function haversineKm(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 /**
  * GET /api/orders
@@ -24,6 +41,7 @@ export async function GET(req: NextRequest) {
       paymentMethod: orders.paymentMethod,
       cutOffReached: orders.cutOffReached,
       cancelReason: orders.cancelReason,
+      deliveryDate: orders.deliveryDate,
       orderedAt: orders.orderedAt,
       confirmedAt: orders.confirmedAt,
       deliveredAt: orders.deliveredAt,
@@ -47,8 +65,9 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/orders
- * Body: { menuId, deliveryAddress }
+ * Body: { menuId, deliveryAddress, deliveryDate? }
  * Creates a new order with status PendingPayment.
+ * For future deliveryDate (YYYY-MM-DD in BDT), the cut-off check is skipped.
  */
 export async function POST(req: NextRequest) {
   const auth = await getAuthUser(req);
@@ -57,13 +76,38 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid JSON");
 
-  const { menuId, deliveryAddress } = body as {
+  const { menuId, deliveryAddress, deliveryDate } = body as {
     menuId?: string;
     deliveryAddress?: unknown;
+    deliveryDate?: string;
   };
 
   if (!menuId) return err("menuId is required");
   if (!deliveryAddress) return err("deliveryAddress is required");
+
+  // Validate deliveryDate if provided
+  const now = new Date();
+  const bdtOffset = 6 * 60;
+  const bdtNow = new Date(now.getTime() + bdtOffset * 60_000);
+  const bdtTodayStr = bdtNow.toISOString().slice(0, 10);
+
+  if (deliveryDate !== undefined) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) {
+      return err("Invalid deliveryDate format. Use YYYY-MM-DD.", 400);
+    }
+    if (deliveryDate < bdtTodayStr) {
+      return err("deliveryDate cannot be in the past.", 400);
+    }
+    const maxDate = new Date(bdtNow.getTime() + 3 * 24 * 60 * 60_000)
+      .toISOString()
+      .slice(0, 10);
+    if (deliveryDate > maxDate) {
+      return err("Pre-orders only available up to 3 days ahead.", 400);
+    }
+  }
+
+  const effectiveDate = deliveryDate ?? bdtTodayStr;
+  const isToday = effectiveDate === bdtTodayStr;
 
   const [menu] = await db
     .select()
@@ -73,9 +117,27 @@ export async function POST(req: NextRequest) {
 
   if (!menu || !menu.isActive) return err("Menu not found or inactive", 404);
 
-  // Check cut-off time
-  const now = new Date();
-  const bdtOffset = 6 * 60;
+  // Load delivery fee from settings
+  const appSettings = await getAppSettings();
+  let deliveryFee = appSettings.delivery_fee_fixed;
+
+  if (appSettings.delivery_fee_mode === "auto") {
+    const addr = deliveryAddress as { lat?: number; lng?: number } | null;
+    if (addr?.lat != null && addr?.lng != null) {
+      const distKm = haversineKm(
+        appSettings.kitchen_lat,
+        appSettings.kitchen_lng,
+        addr.lat,
+        addr.lng
+      );
+      deliveryFee = appSettings.delivery_fee_base + Math.round(distKm * appSettings.delivery_fee_per_km);
+    } else {
+      // Fallback to base fee if coordinates are missing
+      deliveryFee = appSettings.delivery_fee_base;
+    }
+  }
+
+  // Check cut-off only for same-day orders
   const localMinutes =
     ((now.getUTCHours() * 60 + now.getUTCMinutes() + bdtOffset) % (24 * 60));
   const bdtHour = Math.floor(localMinutes / 60);
@@ -83,9 +145,9 @@ export async function POST(req: NextRequest) {
   const nowMins = bdtHour * 60 + bdtMinute;
 
   const cutoffMins = menu.type === "Lunch" ? 10 * 60 : 17 * 60;
-  const cutOffReached = nowMins >= cutoffMins;
+  const cutOffReached = isToday && nowMins >= cutoffMins;
 
-  if (cutOffReached) {
+  if (isToday && cutOffReached) {
     return err(
       `Cut-off time has passed for ${menu.type}. Orders are closed.`,
       400
@@ -98,9 +160,10 @@ export async function POST(req: NextRequest) {
       userId: auth.sub,
       menuId,
       totalPrice: menu.price,
-      deliveryFee: 30,
+      deliveryFee,
       commitmentFee: 50,
       deliveryAddress,
+      deliveryDate: effectiveDate,
       cutOffReached: false,
     })
     .returning();

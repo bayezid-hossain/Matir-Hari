@@ -1,71 +1,196 @@
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
+import { useState, useCallback } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
-import { getMe, updateMe } from "@/lib/api";
+import {
+  getMe,
+  updateMe,
+  type LocationData,
+  type SavedLocation,
+} from "@/lib/api";
 
-type LocationData = {
-  address: string;
-  lat?: number;
-  lng?: number;
-};
+function parseLocationData(raw: unknown): LocationData {
+  if (raw && typeof raw === "object" && "locations" in raw) {
+    return raw as LocationData;
+  }
+  return { locations: [], activeId: null };
+}
+
+function LocationItem({
+  loc,
+  isActive,
+  onSetActive,
+  onDelete,
+  isSaving,
+}: {
+  loc: SavedLocation;
+  isActive: boolean;
+  onSetActive: () => void;
+  onDelete: () => void;
+  isSaving: boolean;
+}) {
+  return (
+    <View
+      className="bg-surface-container-lowest rounded-xl p-4 mb-3"
+      style={{
+        borderWidth: isActive ? 2 : 1,
+        borderColor: isActive
+          ? Colors.primary
+          : `${Colors.outlineVariant}40`,
+        shadowColor: Colors.primary,
+        shadowOpacity: isActive ? 0.1 : 0.04,
+        shadowRadius: 12,
+        elevation: isActive ? 3 : 1,
+      }}
+    >
+      <View className="flex-row items-start justify-between mb-2">
+        <View className="flex-row items-center gap-2 flex-1">
+          <View
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 5,
+              backgroundColor: isActive ? Colors.primary : Colors.outlineVariant,
+            }}
+          />
+          <Text className="font-headline text-on-surface text-base">
+            {loc.label}
+          </Text>
+          {isActive && (
+            <View
+              className="px-2 rounded-full"
+              style={{
+                paddingVertical: 2,
+                backgroundColor: `${Colors.primary}15`,
+              }}
+            >
+              <Text
+                style={{ fontSize: 10, color: Colors.primary, fontWeight: "700" }}
+              >
+                Active
+              </Text>
+            </View>
+          )}
+        </View>
+        {isSaving ? (
+          <ActivityIndicator size="small" color={Colors.primary} />
+        ) : (
+          <TouchableOpacity
+            onPress={onDelete}
+            hitSlop={{ top: 8, bottom: 8, left: 12, right: 8 }}
+          >
+            <Text style={{ color: Colors.error, fontSize: 20, lineHeight: 22 }}>
+              ×
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <Text
+        className="text-sm text-on-surface-variant"
+        style={{ marginLeft: 18 }}
+        numberOfLines={2}
+      >
+        {loc.address}
+      </Text>
+      {!isActive && (
+        <TouchableOpacity
+          onPress={onSetActive}
+          disabled={isSaving}
+          style={{ marginTop: 10, marginLeft: 18, alignSelf: "flex-start" }}
+        >
+          <Text className="text-sm font-body-semibold text-primary">
+            Set as active
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
 
 export default function SavedLocationsScreen() {
   const router = useRouter();
-  const [address, setAddress] = useState("");
+  const insets = useSafeAreaInsets();
+  const [locationData, setLocationData] = useState<LocationData>({
+    locations: [],
+    activeId: null,
+  });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
     getMe()
       .then((profile) => {
-        const loc = profile.locationData as LocationData | null;
-        if (loc?.address) {
-          setAddress(loc.address);
-        }
+        setLocationData(parseLocationData(profile.locationData));
       })
-      .catch(() => {
-        Alert.alert("Error", "Could not load saved locations");
-      })
+      .catch(() => Alert.alert("Error", "Could not load saved locations"))
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = async () => {
-    if (!address.trim()) {
-      Alert.alert("Error", "Address cannot be empty");
-      return;
-    }
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      loadData();
+    }, [loadData])
+  );
 
-    setSaving(true);
+  const handleSetActive = async (id: string) => {
+    const updated: LocationData = { ...locationData, activeId: id };
+    setSavingId(id);
     try {
-      // Keep it simple for this implementation: store just the address
-      const locationData: LocationData = {
-        address: address.trim(),
-        lat: 24.7471, // Mock Mymensingh coordinate
-        lng: 90.4203,
-      };
-
-      await updateMe({ locationData });
-      
-      Alert.alert("Success", "Delivery location updated successfully", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
-    } catch (e: unknown) {
-      Alert.alert("Update Failed", e instanceof Error ? e.message : "Something went wrong.");
+      await updateMe({ locationData: updated });
+      setLocationData(updated);
+    } catch (e) {
+      Alert.alert(
+        "Error",
+        e instanceof Error ? e.message : "Failed to update."
+      );
     } finally {
-      setSaving(false);
+      setSavingId(null);
     }
+  };
+
+  const handleDelete = (id: string) => {
+    Alert.alert("Delete Location", "Remove this saved location?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const updatedLocations = locationData.locations.filter(
+            (l) => l.id !== id
+          );
+          const updatedActiveId =
+            locationData.activeId === id
+              ? (updatedLocations[0]?.id ?? null)
+              : locationData.activeId;
+          const updated: LocationData = {
+            locations: updatedLocations,
+            activeId: updatedActiveId,
+          };
+          setSavingId(id);
+          try {
+            await updateMe({ locationData: updated });
+            setLocationData(updated);
+          } catch (e) {
+            Alert.alert(
+              "Error",
+              e instanceof Error ? e.message : "Failed to delete."
+            );
+          } finally {
+            setSavingId(null);
+          }
+        },
+      },
+    ]);
   };
 
   if (loading) {
@@ -77,106 +202,106 @@ export default function SavedLocationsScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-surface"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        className="flex-1"
+    <View className="flex-1 bg-surface">
+      {/* Header */}
+      <View
+        className="px-5 pb-4 flex-row items-center"
+        style={{
+          paddingTop: insets.top + 8,
+          backgroundColor: "rgba(251,249,245,0.97)",
+          shadowColor: Colors.primary,
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+          elevation: 4,
+        }}
       >
-        {/* Header Branding */}
-        <View className="items-center pt-20 pb-10">
-          <Text className="text-4xl font-headline-extra tracking-tight text-primary mb-1" style={{ letterSpacing: -1 }}>
-            Matir Hari
-          </Text>
-          <Text
-            className="text-[11px] font-label uppercase text-secondary"
-            style={{ letterSpacing: 3 }}
-          >
-            Delivery Address
-          </Text>
-        </View>
-
-        {/* Card */}
-        <View
-          className="mx-5 bg-surface-container-lowest rounded-3xl p-7"
-          style={{
-            shadowColor: Colors.primary,
-            shadowOpacity: 0.06,
-            shadowRadius: 24,
-            elevation: 4,
-          }}
+        <TouchableOpacity
+          onPress={() => router.back()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          className="mr-4"
         >
-          <Text className="text-2xl font-headline text-on-surface mb-1">
-            Saved Location
-          </Text>
-          <Text className="text-sm text-on-surface-variant mb-7">
-            Provide your default delivery address in Mymensingh area.
-          </Text>
+          <Text className="text-primary font-body-semibold text-base">←</Text>
+        </TouchableOpacity>
+        <Text className="text-lg font-headline text-on-surface">
+          Saved Locations
+        </Text>
+      </View>
 
-          {/* Address Input */}
-          <View className="mb-8">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: insets.bottom + 40,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Add new location button */}
+        <TouchableOpacity
+          onPress={() => router.push("/profile/location-picker")}
+          activeOpacity={0.85}
+          className="mb-6"
+        >
+          <LinearGradient
+            colors={[Colors.primary, Colors.primaryContainer]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              height: 52,
+              borderRadius: 12,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              gap: 8,
+              shadowColor: Colors.primary,
+              shadowOpacity: 0.2,
+              shadowRadius: 12,
+              elevation: 6,
+            }}
+          >
             <Text
-              className="text-[11px] font-label uppercase text-on-surface-variant mb-2 ml-1"
-              style={{ letterSpacing: 1.5 }}
-            >
-              Delivery Address
-            </Text>
-            <View className="relative">
-              <TextInput
-                className="bg-surface-container-high rounded-xl p-4 text-on-surface text-base"
-                placeholder="e.g. 15 RK Mission Road, Flat 3B"
-                placeholderTextColor={Colors.outline}
-                value={address}
-                onChangeText={setAddress}
-                multiline
-                numberOfLines={3}
-                style={{ minHeight: 100, textAlignVertical: "top" }}
-              />
-            </View>
-          </View>
-
-          {/* Submit Button */}
-          <TouchableOpacity onPress={handleSave} disabled={saving} activeOpacity={0.85}>
-            <LinearGradient
-              colors={[Colors.primary, Colors.primaryContainer]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="h-14 rounded-xl items-center justify-center flex-row gap-2"
               style={{
-                shadowColor: Colors.primary,
-                shadowOpacity: 0.25,
-                shadowRadius: 12,
-                elevation: 6,
-                opacity: saving ? 0.7 : 1,
+                color: Colors.onPrimary,
+                fontWeight: "700",
+                fontSize: 15,
               }}
             >
-              {saving ? (
-                <ActivityIndicator color={Colors.onPrimary} />
-              ) : (
-                <Text className="text-on-primary font-headline font-bold text-base">
-                  Save Address
-                </Text>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-        
-        {/* Footer Link */}
-        <View className="items-center mt-8 pb-10">
-          <Text className="text-sm text-on-surface-variant">
-            Changed your mind?{" "}
-            <Text
-              className="text-primary font-body-semibold"
-              onPress={() => router.back()}
-            >
-              Go Back
+              + Add New Location
             </Text>
-          </Text>
-        </View>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Location list */}
+        {locationData.locations.length === 0 ? (
+          <View className="items-center py-16 gap-3">
+            <Text className="text-4xl">📍</Text>
+            <Text className="text-on-surface font-headline text-lg">
+              No saved locations
+            </Text>
+            <Text className="text-on-surface-variant text-sm text-center leading-relaxed px-4">
+              Add a delivery location to use when placing orders.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <Text
+              className="text-[11px] font-label uppercase text-on-surface-variant mb-3"
+              style={{ letterSpacing: 1.5 }}
+            >
+              Your Locations
+            </Text>
+            {locationData.locations.map((loc) => (
+              <LocationItem
+                key={loc.id}
+                loc={loc}
+                isActive={loc.id === locationData.activeId}
+                onSetActive={() => handleSetActive(loc.id)}
+                onDelete={() => handleDelete(loc.id)}
+                isSaving={savingId === loc.id}
+              />
+            ))}
+          </>
+        )}
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

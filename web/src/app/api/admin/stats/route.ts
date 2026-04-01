@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/admin-auth";
 import { db } from "@/db";
 import { orders, users } from "@/db/schema";
-import { eq, count, and, gte } from "drizzle-orm";
+import { eq, count, and, gte, lt } from "drizzle-orm";
 
 function todayBDTRange(): { start: Date; end: Date } {
   const now = new Date();
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     db
       .select({ count: count() })
       .from(orders)
-      .where(and(gte(orders.orderedAt, start), gte(end, orders.orderedAt))),
+      .where(and(gte(orders.orderedAt, start), lt(orders.orderedAt, end))),
     db
       .select({ count: count() })
       .from(orders)
