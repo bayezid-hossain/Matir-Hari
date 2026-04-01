@@ -92,6 +92,9 @@ export const orders = pgTable("orders", {
   deliveryAddress: json("delivery_address"),
   // "YYYY-MM-DD" BDT. null = legacy same-day order.
   deliveryDate: text("delivery_date"),
+  // Full menu data at time of order. Immutable — not affected by future menu edits.
+  // shape: { id, name, type, description, itemsDescription, imageUrl, price }
+  menuSnapshot: json("menu_snapshot"),
   cutOffReached: boolean("cut_off_reached").notNull().default(false),
   cancelReason: text("cancel_reason"),
   adminNote: text("admin_note"),
@@ -103,6 +106,26 @@ export const orders = pgTable("orders", {
   outForDeliveryAt: timestamp("out_for_delivery_at"),
   deliveredAt: timestamp("delivered_at"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Menu History ─────────────────────────────────────────────────────────────
+// Tracks which menu was active for each day/type slot and when it changed.
+
+export const menuHistory = pgTable("menu_history", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  dayOfWeek: integer("day_of_week").notNull(), // 0=Sun…6=Sat
+  type: mealTypeEnum("type").notNull(),
+  menuId: text("menu_id")
+    .notNull()
+    .references(() => menus.id),
+  // Snapshot so history is accurate even if admin later edits the menu
+  menuName: text("menu_name").notNull(),
+  menuPrice: integer("menu_price").notNull(),
+  effectiveFrom: text("effective_from").notNull(), // YYYY-MM-DD BDT
+  effectiveUntil: text("effective_until"),         // null = still the current menu for this slot
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // ─── App Settings ─────────────────────────────────────────────────────────────
@@ -145,6 +168,11 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const menusRelations = relations(menus, ({ many }) => ({
   orders: many(orders),
+  history: many(menuHistory),
+}));
+
+export const menuHistoryRelations = relations(menuHistory, ({ one }) => ({
+  menu: one(menus, { fields: [menuHistory.menuId], references: [menus.id] }),
 }));
 
 export const ordersRelations = relations(orders, ({ one }) => ({

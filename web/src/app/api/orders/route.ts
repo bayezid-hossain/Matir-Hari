@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   const auth = await getAuthUser(req);
   if (!auth) return unauthorized();
 
-  const userOrders = await db
+  const rows = await db
     .select({
       id: orders.id,
       status: orders.status,
@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
       cutOffReached: orders.cutOffReached,
       cancelReason: orders.cancelReason,
       deliveryDate: orders.deliveryDate,
+      menuSnapshot: orders.menuSnapshot,
       orderedAt: orders.orderedAt,
       confirmedAt: orders.confirmedAt,
       deliveredAt: orders.deliveredAt,
@@ -59,6 +60,11 @@ export async function GET(req: NextRequest) {
     .innerJoin(menus, eq(orders.menuId, menus.id))
     .where(eq(orders.userId, auth.sub))
     .orderBy(desc(orders.orderedAt));
+
+  const userOrders = rows.map(({ menuSnapshot, menu, ...rest }) => ({
+    ...rest,
+    menu: (menuSnapshot as typeof menu | null) ?? menu,
+  }));
 
   return ok(userOrders);
 }
@@ -154,6 +160,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const menuSnapshot = {
+    id: menu.id,
+    name: menu.name,
+    type: menu.type,
+    description: menu.description,
+    itemsDescription: menu.itemsDescription,
+    imageUrl: menu.imageUrl,
+    price: menu.price,
+  };
+
   const [order] = await db
     .insert(orders)
     .values({
@@ -164,6 +180,7 @@ export async function POST(req: NextRequest) {
       commitmentFee: 50,
       deliveryAddress,
       deliveryDate: effectiveDate,
+      menuSnapshot,
       cutOffReached: false,
     })
     .returning();

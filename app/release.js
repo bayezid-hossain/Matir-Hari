@@ -68,6 +68,7 @@ try {
     console.log(`\n📋 RELEASE NOTES FOR GITHUB:\n\n${releaseNotes || 'Bug fixes and performance improvements.'}\n`);
 
 } catch (error) {
+    console.error(error)
     console.error(`\n❌ Release failed. Please check the logs above.\n`);
     process.exit(1);
 }

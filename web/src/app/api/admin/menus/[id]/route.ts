@@ -3,6 +3,7 @@ import { getAdminSessionFromRequest } from "@/lib/admin-auth";
 import { db } from "@/db";
 import { menus } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { recordMenuHistory } from "@/lib/menu-history";
 
 export async function PATCH(
   req: NextRequest,
@@ -40,5 +41,16 @@ export async function PATCH(
     .returning();
 
   if (!updated) return NextResponse.json({ error: "Menu not found" }, { status: 404 });
+
+  if (updated.isActive) {
+    await recordMenuHistory(
+      updated.dayOfWeek,
+      updated.type,
+      updated.id,
+      updated.name,
+      updated.price
+    );
+  }
+
   return NextResponse.json({ data: updated });
 }

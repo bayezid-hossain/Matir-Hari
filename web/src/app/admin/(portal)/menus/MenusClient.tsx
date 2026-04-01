@@ -150,7 +150,7 @@ export function MenusClient() {
 
   // Helper to get menu for slot
   const getMenu = (day: number, type: "Lunch" | "Dinner") =>
-    menus.find(m => m.dayOfWeek === day && m.type === type);
+    menus.find(m => m.dayOfWeek === day && m.type === type && m.isActive);
 
   return (
     <div className="bg-surface text-on-surface">
@@ -168,13 +168,13 @@ export function MenusClient() {
         </div>
         <div className="bg-surface-container-low p-6 rounded-2xl flex items-center gap-6 shadow-sm border border-outline-variant/10">
           <div className="flex flex-col">
-            <span className="text-3xl font-black text-primary">{menus.length}</span>
+            <span className="text-3xl font-black text-primary">{menus.filter(m => m.isActive).length}</span>
             <span className="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">Active Items</span>
           </div>
           <div className="w-px h-10 bg-outline-variant/30"></div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-on-surface">Inventory Link</span>
-            <span className="text-[10px] text-stone-500 uppercase tracking-tighter">{Math.floor(menus.length / 2)} / 7 Days Complete</span>
+            <span className="text-[10px] text-stone-500 uppercase tracking-tighter">{Math.floor(menus.filter(m => m.isActive).length / 2)} / 7 Days Complete</span>
           </div>
         </div>
       </section>

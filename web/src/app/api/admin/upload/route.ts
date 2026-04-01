@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 /**
  * POST /api/admin/upload
  * Handles multipart/form-data with a "file" field.
- * Saves to public/uploads/ and returns the URL.
+ * Uploads to Cloudinary and returns the secure URL.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -17,27 +22,19 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    // Create a unique filename
-    const ext = path.extname(file.name) || ".jpg";
-    const filename = `${Date.now()}-${Math.round(Math.random() * 10000)}${ext}`;
-    
-    // Save to public/uploads
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    const filepath = path.join(uploadDir, filename);
 
-    // Make sure the directory exists
-    try {
-      await writeFile(filepath, buffer);
-    } catch (e) {
-      // In case public/uploads doesn't exist, we fallback
-      const fs = require('fs');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      await writeFile(filepath, buffer);
-    }
+    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "matir-hari/menus" },
+        (error, result) => {
+          if (error || !result) return reject(error ?? new Error("No result"));
+          resolve(result as { secure_url: string });
+        }
+      );
+      stream.end(buffer);
+    });
 
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    return NextResponse.json({ url: result.secure_url });
   } catch (error) {
     console.error("Upload Error:", error);
     return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });

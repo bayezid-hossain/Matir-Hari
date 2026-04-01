@@ -32,7 +32,7 @@ export async function GET(
 
   const { id } = await params;
 
-  const [order] = await db
+  const [row] = await db
     .select({
       id: orders.id,
       status: orders.status,
@@ -45,6 +45,7 @@ export async function GET(
       cancelReason: orders.cancelReason,
       adminNote: orders.adminNote,
       deliveryAddress: orders.deliveryAddress,
+      menuSnapshot: orders.menuSnapshot,
       orderedAt: orders.orderedAt,
       paymentSubmittedAt: orders.paymentSubmittedAt,
       confirmedAt: orders.confirmedAt,
@@ -67,7 +68,10 @@ export async function GET(
     .where(and(eq(orders.id, id), eq(orders.userId, auth.sub)))
     .limit(1);
 
-  if (!order) return notFound("Order not found");
+  if (!row) return notFound("Order not found");
+
+  const { menuSnapshot, menu, ...rest } = row;
+  const order = { ...rest, menu: (menuSnapshot as typeof menu | null) ?? menu };
 
   return ok(order);
 }

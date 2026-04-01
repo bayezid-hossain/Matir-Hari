@@ -3,6 +3,7 @@ import { getAdminSessionFromRequest } from "@/lib/admin-auth";
 import { db } from "@/db";
 import { menus } from "@/db/schema";
 import { asc } from "drizzle-orm";
+import { recordMenuHistory } from "@/lib/menu-history";
 
 export async function GET(req: NextRequest) {
   if (!(await getAdminSessionFromRequest(req))) {
@@ -44,6 +45,16 @@ export async function POST(req: NextRequest) {
       isActive: isActive ?? true,
     })
     .returning();
+
+  if (inserted.isActive) {
+    await recordMenuHistory(
+      inserted.dayOfWeek,
+      inserted.type,
+      inserted.id,
+      inserted.name,
+      inserted.price
+    );
+  }
 
   return NextResponse.json({ data: inserted }, { status: 201 });
 }
