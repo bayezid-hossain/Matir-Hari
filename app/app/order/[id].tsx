@@ -289,7 +289,7 @@ export default function OrderDetailScreen() {
         <ScrollView
           contentContainerStyle={{ 
             padding: 20, 
-            paddingBottom: isKeyboardVisible ? keyboardHeight + 60 : 140 
+            paddingBottom: isKeyboardVisible ? keyboardHeight + 60 : 40 
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -538,65 +538,59 @@ export default function OrderDetailScreen() {
               </View>
             </View>
           )}
+          {/* Bottom actions */}
+          {order && canCancel && (
+            <View
+              style={{
+                marginTop: 20,
+                paddingTop: 20,
+                borderTopWidth: 1,
+                borderTopColor: `${Colors.outlineVariant}28`,
+                gap: 10,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setModalType("change")}
+                disabled={actionLoading}
+                style={{
+                  height: 52,
+                  borderRadius: 12,
+                  backgroundColor: Colors.surfaceContainerHigh,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {actionLoading ? (
+                  <ActivityIndicator color={Colors.primary} />
+                ) : (
+                  <Text style={{ color: Colors.primary, fontWeight: "700", fontSize: 15 }}>
+                    Request Change
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setModalType("cancel")}
+                disabled={actionLoading}
+                style={{
+                  height: 52,
+                  borderRadius: 12,
+                  backgroundColor: `${Colors.errorContainer}60`,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {actionLoading ? (
+                  <ActivityIndicator color={Colors.error} />
+                ) : (
+                  <Text style={{ color: Colors.error, fontWeight: "700", fontSize: 15 }}>
+                    {order.cutOffReached ? "Request Cancellation" : "Cancel Order"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
-      )}
-
-      {/* Bottom actions */}
-      {order && canCancel && (
-        <View
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: 20,
-            paddingBottom: insets.bottom + 16,
-            backgroundColor: Colors.surface,
-            borderTopWidth: 1,
-            borderTopColor: `${Colors.outlineVariant}28`,
-            gap: 10,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => setModalType("change")}
-            disabled={actionLoading}
-            style={{
-              height: 52,
-              borderRadius: 12,
-              backgroundColor: Colors.surfaceContainerHigh,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {actionLoading ? (
-              <ActivityIndicator color={Colors.primary} />
-            ) : (
-              <Text style={{ color: Colors.primary, fontWeight: "700", fontSize: 15 }}>
-                Request Change
-              </Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => setModalType("cancel")}
-            disabled={actionLoading}
-            style={{
-              height: 52,
-              borderRadius: 12,
-              backgroundColor: `${Colors.errorContainer}60`,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {actionLoading ? (
-              <ActivityIndicator color={Colors.error} />
-            ) : (
-              <Text style={{ color: Colors.error, fontWeight: "700", fontSize: 15 }}>
-                {order.cutOffReached ? "Request Cancellation" : "Cancel Order"}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
       )}
 
       {/* Cancel modal */}
