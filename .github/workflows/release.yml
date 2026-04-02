@@ -44,6 +44,15 @@ jobs:
             echo "⚠️ GOOGLE_SERVICES_JSON secret not found. Skipping."
           fi
           
+      - name: Verify API URL Secret
+        run: |
+          if [ -z "${{ secrets.EXPO_PUBLIC_API_URL }}" ]; then
+            echo "❌ EXPO_PUBLIC_API_URL secret is NOT set — build will fall back to localhost!"
+            exit 1
+          else
+            echo "✅ EXPO_PUBLIC_API_URL is set: ${{ secrets.EXPO_PUBLIC_API_URL }}"
+          fi
+
       - name: Prebuild Expo Project
         working-directory: app
         env:

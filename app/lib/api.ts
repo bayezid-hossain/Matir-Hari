@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 
 const RAW_API_URL = process.env.EXPO_PUBLIC_API_URL || (Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000');
 const BASE_URL = RAW_API_URL.endsWith("/") ? RAW_API_URL.slice(0, -1) : RAW_API_URL;
+console.log("[API] BASE_URL =", BASE_URL, "| EXPO_PUBLIC_API_URL =", process.env.EXPO_PUBLIC_API_URL ?? "(not set)");
 /** Convert server-relative image paths to absolute URLs for mobile use. */
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
