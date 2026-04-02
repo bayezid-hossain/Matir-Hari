@@ -8,6 +8,7 @@ on:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       contents: write
     
@@ -44,13 +45,14 @@ jobs:
             echo "⚠️ GOOGLE_SERVICES_JSON secret not found. Skipping."
           fi
           
-      - name: Verify API URL Secret
+      - name: Verify API URL
         run: |
-          if [ -z "${{ secrets.EXPO_PUBLIC_API_URL }}" ]; then
-            echo "❌ EXPO_PUBLIC_API_URL secret is NOT set — build will fall back to localhost!"
+          API_URL="${{ vars.EXPO_PUBLIC_API_URL }}"
+          if [ -z "$API_URL" ]; then
+            echo "❌ EXPO_PUBLIC_API_URL is NOT set — build will fall back to localhost!"
             exit 1
           else
-            echo "✅ EXPO_PUBLIC_API_URL is set: ${{ secrets.EXPO_PUBLIC_API_URL }}"
+            echo "✅ EXPO_PUBLIC_API_URL = $API_URL"
           fi
 
       - name: Prebuild Expo Project
@@ -58,28 +60,28 @@ jobs:
         env:
           EXPO_PUBLIC_API_MODE: production
           NODE_ENV: production
-          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
           GOOGLE_MAPS_ANDROID_KEY: ${{ secrets.GOOGLE_MAPS_ANDROID_KEY }}
         run: npx expo prebuild --platform android --no-install
-        
+
       - name: Make Gradle Executable
         working-directory: app/android
         run: chmod +x gradlew
-        
+
       - name: Build APK Release
         working-directory: app/android
         env:
           EXPO_PUBLIC_API_MODE: production
           NODE_ENV: production
-          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
         run: ./gradlew assembleRelease
-        
+
       - name: Build AAB Release (Play Store)
         working-directory: app/android
         env:
           EXPO_PUBLIC_API_MODE: production
           NODE_ENV: production
-          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
         run: ./gradlew bundleRelease
         
       - name: Extract Release Notes
