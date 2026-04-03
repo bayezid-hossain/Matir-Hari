@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+const KitchenMapPicker = dynamic(
+  () => import("@/components/KitchenMapPicker").then((m) => m.KitchenMapPicker),
+  { ssr: false, loading: () => <div className="h-80 rounded-xl bg-surface-container-low animate-pulse" /> }
+);
 
 type AppSettings = {
   delivery_fee_mode: "fixed" | "auto";
@@ -175,6 +181,17 @@ export function SettingsClient() {
             Used for distance-based delivery fee calculation in Auto mode.
           </p>
         </div>
+
+        {/* Interactive map picker */}
+        <KitchenMapPicker
+          lat={draft.kitchen_lat ?? settings.kitchen_lat}
+          lng={draft.kitchen_lng ?? settings.kitchen_lng}
+          onChange={(lat, lng) => {
+            update("kitchen_lat", lat);
+            update("kitchen_lng", lng);
+          }}
+        />
+
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-surface-container-low rounded-xl p-5">
             <label className="block text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-2">
@@ -201,9 +218,6 @@ export function SettingsClient() {
             />
           </div>
         </div>
-        <p className="text-xs text-stone-400">
-          Default: 24.7471, 90.4203 (Mymensingh city centre). Open Google Maps → right-click your kitchen → copy coordinates.
-        </p>
       </section>
 
       {/* Save Button */}

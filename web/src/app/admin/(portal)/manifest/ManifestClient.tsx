@@ -219,7 +219,7 @@ function ManifestBlock({
       </h3>
       <div className="grid grid-cols-1 gap-4">
         {orders.map((order) => {
-          const balance = order.totalPrice - order.commitmentFee;
+          const balance = order.totalPrice - order.commitmentFee + order.deliveryFee;
           const isLunch = order.menu.type === "Lunch";
           const addr = order.deliveryAddress;
           
@@ -282,6 +282,11 @@ function ManifestBlock({
                   {balance > 0 ? (
                     <span className="text-xs font-black uppercase tracking-widest text-error border border-error/20 bg-error/5 px-2 py-1 rounded text-center">
                       Collect ৳{balance}
+                      {order.deliveryFee > 0 && (
+                        <span className="block text-[10px] font-normal normal-case tracking-normal opacity-70">
+                          incl. ৳{order.deliveryFee} delivery
+                        </span>
+                      )}
                     </span>
                   ) : (
                     <span className="text-xs font-black uppercase tracking-widest text-green-700 border border-green-700/20 bg-green-50 px-2 py-1 rounded text-center">
@@ -304,7 +309,7 @@ function ManifestBlock({
                 {/* Print Only Action */}
                 <div className="hidden print:block text-right">
                     <span className="text-sm font-black uppercase text-stone-800">
-                      {balance > 0 ? `COLLECT: ৳${balance}` : "PREPAID"}
+                      {balance > 0 ? `COLLECT: ৳${balance}${order.deliveryFee > 0 ? ` (inc ৳${order.deliveryFee} del)` : ""}` : "PREPAID"}
                     </span>
                 </div>
               </div>

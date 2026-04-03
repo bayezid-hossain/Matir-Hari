@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { Colors } from "@/constants/colors";
+import { getPaymentNumbers, submitPayment, uploadPaymentScreenshot, type PaymentNumber } from "@/lib/api";
+import { CustomAlert } from "@/store/alert-store";
+import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
+import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
-  Image,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import * as ImagePicker from "expo-image-picker";
-import * as Clipboard from "expo-clipboard";
-import { Colors } from "@/constants/colors";
-import { submitPayment, uploadPaymentScreenshot, getPaymentNumbers, type PaymentNumber } from "@/lib/api";
-import { CustomAlert } from "@/store/alert-store";
 
 interface PaymentFormProps {
   orderId: string;
@@ -48,7 +48,7 @@ export function PaymentForm({
         const preferred = nums.find((n) => n.type === initialPaymentMethod) ?? nums[0] ?? null;
         if (preferred) setSelectedNumberId(preferred.id);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingNumbers(false));
   }, [initialPaymentMethod]);
 
@@ -205,7 +205,7 @@ export function PaymentForm({
       {/* TrxID input */}
       <View>
         <Text style={{ fontSize: 10, fontWeight: "700", letterSpacing: 1.5, color: Colors.onSurfaceVariant, textTransform: "uppercase", marginBottom: 6, marginLeft: 2 }}>
-          Transaction ID
+          Transaction ID / Last 4-digit
         </Text>
         <TextInput
           style={{

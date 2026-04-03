@@ -189,6 +189,13 @@ export async function getPaymentNumbers(): Promise<PaymentNumber[]> {
   return json.data ?? [];
 }
 
+export async function getDeliveryFee(lat?: number, lng?: number): Promise<number> {
+  const params = lat != null && lng != null ? `?lat=${lat}&lng=${lng}` : "";
+  const res = await fetch(`${BASE_URL}/api/delivery-fee${params}`);
+  const json = await res.json();
+  return json.data?.fee ?? 30;
+}
+
 export async function getOrders(): Promise<Order[]> {
   const data = await request<Order[]>("/api/orders");
   return data.map(fixOrderImageUrl);

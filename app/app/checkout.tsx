@@ -3,6 +3,7 @@ import { Colors } from "@/constants/colors";
 import { useKeyboard } from "@/hooks/use-keyboard";
 import {
   createOrder,
+  getDeliveryFee,
   getMe,
   getMenusByDate,
   type LocationData,
@@ -53,9 +54,8 @@ export default function CheckoutScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [selectedLocation, setSelectedLocation] = useState<SavedLocation | null>(
-    null
-  );
+  const [selectedLocation, setSelectedLocation] = useState<SavedLocation | null>(null);
+  const [deliveryFee, setDeliveryFee] = useState(30);
 
   const effectiveDate = deliveryDate ?? getBdtTodayString();
   const isToday = effectiveDate === getBdtTodayString();
@@ -91,6 +91,13 @@ export default function CheckoutScreen() {
         .catch(() => { });
     }, [])
   );
+
+  // Fetch delivery fee whenever location changes
+  React.useEffect(() => {
+    getDeliveryFee(selectedLocation?.lat, selectedLocation?.lng)
+      .then(setDeliveryFee)
+      .catch(() => {});
+  }, [selectedLocation?.lat, selectedLocation?.lng]);
 
   const { isKeyboardVisible, keyboardHeight } = useKeyboard();
 
@@ -377,7 +384,7 @@ export default function CheckoutScreen() {
               </View>
               <View className="flex-row justify-between">
                 <Text className="text-on-surface-variant">Delivery Fee</Text>
-                <Text className="font-body-medium text-on-surface">৳ 30.00</Text>
+                <Text className="font-body-medium text-on-surface">৳ {deliveryFee}.00</Text>
               </View>
               <View
                 className="flex-row justify-between items-end pt-3"
@@ -394,7 +401,7 @@ export default function CheckoutScreen() {
                 </Text>
               </View>
               <Text className="text-[10px] text-on-surface-variant leading-snug">
-                *৳50 secures your slot. Remaining ৳{menu.price * quantity - 50 + 30}{" "}
+                *৳50 secures your slot. Remaining ৳{menu.price * quantity - 50 + deliveryFee}{" "}
                 payable on delivery.
               </Text>
             </View>
