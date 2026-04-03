@@ -140,7 +140,7 @@ export function ChangeRequestModal({
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => setQuantity((q) => Math.min(10, q + 1))}
+                onPress={() => setQuantity((q) => q + 1)}
                 style={{
                   width: 44,
                   height: 44,

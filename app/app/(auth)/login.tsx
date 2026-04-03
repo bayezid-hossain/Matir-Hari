@@ -117,7 +117,10 @@ export default function LoginScreen() {
               >
                 Password
               </Text>
-              <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
+              <TouchableOpacity
+                onPress={() => router.push("/(auth)/forgot-password")}
+                style={{ paddingVertical: 10, paddingHorizontal: 8 }}
+              >
                 <Text
                   className="text-[11px] font-label uppercase text-primary"
                   style={{ letterSpacing: 1 }}
@@ -174,15 +177,17 @@ export default function LoginScreen() {
 
         {/* Footer */}
         <View className="items-center mt-8 pb-10">
-          <Text className="text-sm text-on-surface-variant">
-            Don&apos;t have an account?{" "}
-            <Text
-              className="text-primary font-body-semibold"
-              onPress={() => router.push("/(auth)/signup")}
-            >
-              Create Account
+          <TouchableOpacity
+            onPress={() => router.push("/(auth)/signup")}
+            style={{ paddingVertical: 10, paddingHorizontal: 12 }}
+          >
+            <Text className="text-sm text-on-surface-variant">
+              Don&apos;t have an account?{" "}
+              <Text className="text-primary font-body-semibold">
+                Create Account
+              </Text>
             </Text>
-          </Text>
+          </TouchableOpacity>
         </View>
         
         {/* Dynamic spacer for keyboard */}

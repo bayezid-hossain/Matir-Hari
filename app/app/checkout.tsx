@@ -1,33 +1,27 @@
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-} from "react-native";
-import { useState, useCallback, useRef } from "react";
-import React from "react";
-import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { PaymentForm } from "@/components/PaymentForm";
 import { Colors } from "@/constants/colors";
+import { useKeyboard } from "@/hooks/use-keyboard";
 import {
-  getMenusByDate,
   createOrder,
-  submitPayment,
   getMe,
-  type MenuEntry,
-  type SavedLocation,
+  getMenusByDate,
   type LocationData,
+  type MenuEntry,
+  type SavedLocation
 } from "@/lib/api";
 import { CustomAlert } from "@/store/alert-store";
-import { useKeyboard } from "@/hooks/use-keyboard";
-import { PaymentForm } from "@/components/PaymentForm";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const BKASH_NUMBER = "017XX-XXXXXX"; // Replace in production
 
@@ -75,8 +69,8 @@ export default function CheckoutScreen() {
           data.lunch?.id === menuId
             ? data.lunch
             : data.dinner?.id === menuId
-            ? data.dinner
-            : null;
+              ? data.dinner
+              : null;
         setMenu(found);
       });
     }, [menuId, effectiveDate])
@@ -94,7 +88,7 @@ export default function CheckoutScreen() {
             null;
           setSelectedLocation(active);
         })
-        .catch(() => {});
+        .catch(() => { });
     }, [])
   );
 
@@ -178,9 +172,9 @@ export default function CheckoutScreen() {
       <ScrollView
         ref={scrollRef}
         className="flex-1"
-        contentContainerStyle={{ 
-          padding: 20, 
-          paddingBottom: isKeyboardVisible ? keyboardHeight + 40 : 120 
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: isKeyboardVisible ? keyboardHeight + 40 : 120
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -250,7 +244,7 @@ export default function CheckoutScreen() {
                     <Text style={{ fontSize: 18, fontWeight: "800", color: Colors.primary }}>{quantity}</Text>
                   </View>
                   <TouchableOpacity
-                    onPress={() => setQuantity((q) => Math.min(10, q + 1))}
+                    onPress={() => setQuantity((q) => q + 1)}
                     style={{
                       width: 36,
                       height: 36,
@@ -372,7 +366,7 @@ export default function CheckoutScreen() {
               <View className="flex-row justify-between">
                 <Text className="text-on-surface-variant">Meal Subtotal</Text>
                 <Text className="font-body-medium text-on-surface">
-                  ৳ {menu.price * quantity}.00
+                  ৳ {menu.price} x {quantity} = {menu.price * quantity}.00
                 </Text>
               </View>
               <View className="flex-row justify-between">

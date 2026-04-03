@@ -101,6 +101,7 @@ export const orders = pgTable("orders", {
   quantity: integer("quantity").notNull().default(1),
   changeRequest: json("change_request"),
   paymentScreenshot: text("payment_screenshot"),
+  paymentNumberSnapshot: json("payment_number_snapshot"),
   // Timestamps for each stage
   orderedAt: timestamp("ordered_at").notNull().defaultNow(),
   paymentSubmittedAt: timestamp("payment_submitted_at"),
@@ -143,6 +144,18 @@ export const menuHistory = pgTable("menu_history", {
 export const settings = pgTable("settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const paymentNumbers = pgTable("payment_numbers", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  type: paymentMethodEnum("type").notNull(),
+  number: text("number").notNull(),
+  label: text("label").notNull().default(""),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
@@ -190,3 +203,5 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, { fields: [notifications.userId], references: [users.id] }),
 }));
+
+export const paymentNumbersRelations = relations(paymentNumbers, () => ({}));

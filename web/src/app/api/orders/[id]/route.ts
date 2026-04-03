@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { eq, and, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { orders, menus, users } from "@/db/schema";
+import { orders, menus, users, paymentNumbers } from "@/db/schema";
 import { v2 as cloudinary } from "cloudinary";
 import { getAuthUser } from "@/lib/auth";
 import { ok, err, unauthorized, notFound, forbidden } from "@/lib/response";
@@ -113,7 +113,7 @@ export async function PATCH(
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid JSON");
 
-  const { action, trxId, paymentMethod, paymentScreenshot, cancelReason, requestedQuantity, isAdmin } =
+  const { action, trxId, paymentMethod, paymentScreenshot, cancelReason, requestedQuantity, paymentNumberId, isAdmin } =
     body as {
       action?: string;
       trxId?: string;
@@ -121,6 +121,7 @@ export async function PATCH(
       paymentScreenshot?: string;
       cancelReason?: string;
       requestedQuantity?: number;
+      paymentNumberId?: string;
       isAdmin?: boolean;
     };
 
@@ -168,12 +169,26 @@ export async function PATCH(
         }
       }
 
+      // Fetch payment number snapshot if provided
+      let paymentNumberSnapshot: Record<string, unknown> | null = null;
+      if (paymentNumberId) {
+        const [pn] = await db
+          .select()
+          .from(paymentNumbers)
+          .where(eq(paymentNumbers.id, paymentNumberId))
+          .limit(1);
+        if (pn) {
+          paymentNumberSnapshot = { id: pn.id, type: pn.type, number: pn.number, label: pn.label };
+        }
+      }
+
       const [updated] = await db
         .update(orders)
         .set({
           trxId: trxId?.trim() || null,
           paymentMethod: (paymentMethod as "bKash" | "Nagad") || "bKash",
           paymentScreenshot: paymentScreenshot?.trim() || null,
+          paymentNumberSnapshot,
           paymentSubmittedAt: new Date(),
           cutOffReached,
           updatedAt: new Date(),
@@ -231,7 +246,7 @@ export async function PATCH(
         return err("Cannot request changes on a delivered or cancelled order");
 
       const reqQty = requestedQuantity
-        ? Math.max(1, Math.min(10, Number(requestedQuantity)))
+        ? Math.max(1, Number(requestedQuantity))
         : (order as any).quantity ?? 1;
 
       const [updated] = await db

@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
     deliveryDate?: string;
     quantity?: number;
   };
-  const quantity = Math.max(1, Math.min(10, Number(quantityRaw) || 1));
+  const quantity = Math.max(1, Number(quantityRaw) || 1);
 
   if (!menuId) return err("menuId is required");
   if (!deliveryAddress) return err("deliveryAddress is required");

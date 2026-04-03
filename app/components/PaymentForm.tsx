@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,14 +6,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  Platform,
-  KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
+import * as Clipboard from "expo-clipboard";
 import { Colors } from "@/constants/colors";
-import { submitPayment, uploadPaymentScreenshot } from "@/lib/api";
+import { submitPayment, uploadPaymentScreenshot, getPaymentNumbers, type PaymentNumber } from "@/lib/api";
 import { CustomAlert } from "@/store/alert-store";
 
 interface PaymentFormProps {
@@ -33,10 +32,34 @@ export function PaymentForm({
   onSuccess,
   paddingBottom = 0,
 }: PaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState<"bKash" | "Nagad">(initialPaymentMethod);
+  const [paymentNumbers, setPaymentNumbers] = useState<PaymentNumber[]>([]);
+  const [loadingNumbers, setLoadingNumbers] = useState(true);
+  const [selectedNumberId, setSelectedNumberId] = useState<string | null>(null);
   const [trxId, setTrxId] = useState(initialTrxId);
   const [screenshotUri, setScreenshotUri] = useState<string | null>(initialScreenshot ?? null);
   const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    getPaymentNumbers()
+      .then((nums) => {
+        setPaymentNumbers(nums);
+        // Auto-select the first number matching initialPaymentMethod, or just the first
+        const preferred = nums.find((n) => n.type === initialPaymentMethod) ?? nums[0] ?? null;
+        if (preferred) setSelectedNumberId(preferred.id);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingNumbers(false));
+  }, [initialPaymentMethod]);
+
+  const selectedNumber = paymentNumbers.find((n) => n.id === selectedNumberId) ?? null;
+
+  const handleCopy = async () => {
+    if (!selectedNumber) return;
+    await Clipboard.setStringAsync(selectedNumber.number);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -44,29 +67,30 @@ export function PaymentForm({
       CustomAlert.alert("Permission Denied", "We need camera roll permissions to upload screenshots.");
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
-
     if (!result.canceled) {
       setScreenshotUri(result.assets[0].uri);
     }
   };
 
   const handleSubmit = async () => {
+    if (!selectedNumberId && paymentNumbers.length > 0) {
+      CustomAlert.alert("Select Payment Number", "Please select which number you sent money to.");
+      return;
+    }
     setSubmitting(true);
     try {
       let uploadedUrl: string | undefined = screenshotUri || undefined;
-      // If it's a new local URI (starts with file:// or contains /Cache/), upload it
       if (screenshotUri && !screenshotUri.startsWith("http")) {
         const uploadRes = await uploadPaymentScreenshot(screenshotUri);
         uploadedUrl = uploadRes.url;
       }
-
-      await submitPayment(orderId, trxId.trim(), paymentMethod, uploadedUrl);
+      const method = selectedNumber?.type ?? initialPaymentMethod;
+      await submitPayment(orderId, trxId.trim(), method, uploadedUrl, selectedNumberId ?? undefined);
       CustomAlert.alert("Success", "Payment info saved successfully!");
       onSuccess();
     } catch (error: any) {
@@ -82,7 +106,7 @@ export function PaymentForm({
         backgroundColor: Colors.surfaceContainerLow,
         borderRadius: 16,
         padding: 18,
-        gap: 14,
+        gap: 16,
         paddingBottom: paddingBottom + 18,
       }}
     >
@@ -90,29 +114,93 @@ export function PaymentForm({
         Submit Payment
       </Text>
 
-      {/* Payment method selector */}
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        {(["bKash", "Nagad"] as const).map((m) => (
-          <TouchableOpacity
-            key={m}
-            onPress={() => setPaymentMethod(m)}
-            style={{
-              flex: 1,
-              height: 44,
-              borderRadius: 10,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: paymentMethod === m ? Colors.primary : Colors.surfaceContainerHigh,
-              borderWidth: paymentMethod === m ? 0 : 1,
-              borderColor: `${Colors.outlineVariant}40`,
-            }}
-          >
-            <Text style={{ fontWeight: "700", fontSize: 14, color: paymentMethod === m ? Colors.onPrimary : Colors.onSurfaceVariant }}>
-              {m}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {/* Payment number selector */}
+      {loadingNumbers ? (
+        <ActivityIndicator color={Colors.primary} size="small" />
+      ) : paymentNumbers.length === 0 ? (
+        <View style={{ backgroundColor: `${Colors.error}10`, borderRadius: 10, padding: 12 }}>
+          <Text style={{ fontSize: 13, color: Colors.error }}>No payment numbers configured. Contact admin.</Text>
+        </View>
+      ) : (
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontSize: 10, fontWeight: "700", letterSpacing: 1.5, color: Colors.onSurfaceVariant, textTransform: "uppercase" }}>
+            Send ৳50 to
+          </Text>
+          {paymentNumbers.map((pn) => {
+            const isSelected = selectedNumberId === pn.id;
+            const color = pn.type === "bKash" ? "#e2136e" : "#F7941D";
+            return (
+              <TouchableOpacity
+                key={pn.id}
+                onPress={() => setSelectedNumberId(pn.id)}
+                activeOpacity={0.8}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 14,
+                  borderRadius: 12,
+                  borderWidth: 2,
+                  borderColor: isSelected ? color : `${Colors.outlineVariant}40`,
+                  backgroundColor: isSelected ? `${color}08` : Colors.surfaceContainerHigh,
+                  gap: 12,
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: `${color}15`,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ fontSize: 11, fontWeight: "800", color }}>{pn.type === "bKash" ? "bK" : "Ng"}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 15, fontWeight: "700", color: Colors.onSurface, letterSpacing: 0.5 }}>
+                    {pn.number}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: Colors.onSurfaceVariant, marginTop: 1 }}>
+                    {pn.type}{pn.label ? ` · ${pn.label}` : ""}
+                  </Text>
+                </View>
+                {isSelected ? (
+                  <Ionicons name="checkmark-circle" size={22} color={color} />
+                ) : (
+                  <Ionicons name="ellipse-outline" size={22} color={Colors.outline} />
+                )}
+              </TouchableOpacity>
+            );
+          })}
+
+          {/* Copy number button */}
+          {selectedNumber && (
+            <TouchableOpacity
+              onPress={handleCopy}
+              activeOpacity={0.75}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                paddingVertical: 10,
+                borderRadius: 10,
+                backgroundColor: Colors.surfaceContainerHigh,
+              }}
+            >
+              <Ionicons
+                name={copied ? "checkmark-done-outline" : "copy-outline"}
+                size={16}
+                color={copied ? "#2e7d32" : Colors.primary}
+              />
+              <Text style={{ fontSize: 13, fontWeight: "600", color: copied ? "#2e7d32" : Colors.primary }}>
+                {copied ? "Copied!" : `Copy ${selectedNumber.number}`}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* TrxID input */}
       <View>
@@ -167,7 +255,6 @@ export function PaymentForm({
               <Text style={{ fontSize: 13, color: Colors.outline }}>Tap to select image</Text>
             </View>
           )}
-
           {screenshotUri && (
             <TouchableOpacity
               onPress={() => setScreenshotUri(null)}
@@ -190,11 +277,7 @@ export function PaymentForm({
       </View>
 
       {/* Submit button */}
-      <TouchableOpacity
-        onPress={handleSubmit}
-        disabled={submitting}
-        activeOpacity={0.85}
-      >
+      <TouchableOpacity onPress={handleSubmit} disabled={submitting} activeOpacity={0.85}>
         <LinearGradient
           colors={[Colors.primary, Colors.primaryContainer]}
           start={{ x: 0, y: 0 }}

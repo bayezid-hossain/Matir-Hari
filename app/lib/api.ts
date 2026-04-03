@@ -89,6 +89,14 @@ export type MenuEntry = {
   cutoffTime: string;
 };
 
+export type PaymentNumber = {
+  id: string;
+  type: "bKash" | "Nagad";
+  number: string;
+  label: string;
+  isActive: boolean;
+};
+
 export type TodayMenus = {
   date: string;
   requestedDate: string;
@@ -150,6 +158,12 @@ export type Order = {
     requestedAt: string;
     previousStatus: string;
   } | null;
+  paymentNumberSnapshot: {
+    id: string;
+    type: "bKash" | "Nagad";
+    number: string;
+    label: string;
+  } | null;
   orderedAt: string;
   confirmedAt: string | null;
   cookingStartedAt: string | null;
@@ -167,6 +181,12 @@ export type Order = {
 
 function fixOrderImageUrl(order: Order): Order {
   return { ...order, menu: { ...order.menu, imageUrl: resolveImageUrl(order.menu.imageUrl) } };
+}
+
+export async function getPaymentNumbers(): Promise<PaymentNumber[]> {
+  const res = await fetch(`${BASE_URL}/api/payment-numbers`);
+  const json = await res.json();
+  return json.data ?? [];
 }
 
 export async function getOrders(): Promise<Order[]> {
@@ -195,11 +215,18 @@ export async function submitPayment(
   orderId: string,
   trxId: string,
   paymentMethod: "bKash" | "Nagad",
-  paymentScreenshot?: string
+  paymentScreenshot?: string,
+  paymentNumberId?: string
 ): Promise<Order> {
   return request(`/api/orders/${orderId}`, {
     method: "PATCH",
-    body: JSON.stringify({ action: "submit_payment", trxId, paymentMethod, paymentScreenshot }),
+    body: JSON.stringify({
+      action: "submit_payment",
+      trxId,
+      paymentMethod,
+      paymentScreenshot,
+      ...(paymentNumberId ? { paymentNumberId } : {}),
+    }),
   });
 }
 

@@ -176,7 +176,7 @@ export default function OrderDetailScreen() {
   const insets = useSafeAreaInsets();
   const [order, setOrder] = useState<(Order & Record<string, unknown>) | null>(null);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<"cancel" | "change" | null>(null);
   const [modalType, setModalType] = useState<"cancel" | "change" | null>(null);
   const [isEditingPayment, setIsEditingPayment] = useState(false);
   const { isKeyboardVisible, keyboardHeight } = useKeyboard();
@@ -204,7 +204,7 @@ export default function OrderDetailScreen() {
 
   const handleCancelConfirm = async (reason: string) => {
     setModalType(null);
-    setActionLoading(true);
+    setActionLoading("cancel");
     try {
       const updated = await cancelOrder(id!, reason);
       setOrder(updated as Order & Record<string, unknown>);
@@ -217,13 +217,13 @@ export default function OrderDetailScreen() {
     } catch (e: unknown) {
       CustomAlert.alert("Error", e instanceof Error ? e.message : "Failed.");
     } finally {
-      setActionLoading(false);
+      setActionLoading(null);
     }
   };
 
   const handleChangeConfirm = async (reason: string, requestedQuantity?: number) => {
     setModalType(null);
-    setActionLoading(true);
+    setActionLoading("change");
     try {
       const updated = await requestChange(id!, reason, requestedQuantity);
       setOrder(updated as Order & Record<string, unknown>);
@@ -231,7 +231,7 @@ export default function OrderDetailScreen() {
     } catch (e: unknown) {
       CustomAlert.alert("Error", e instanceof Error ? e.message : "Failed.");
     } finally {
-      setActionLoading(false);
+      setActionLoading(null);
     }
   };
 
@@ -430,12 +430,25 @@ export default function OrderDetailScreen() {
             >
               <Ionicons name="alert-circle" size={22} color="#ea580c" style={{ marginTop: 1 }} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "700", color: "#9a3412", marginBottom: 4 }}>
-                  Cancellation Requested
-                </Text>
-                <Text style={{ fontSize: 13, color: "#c2410c", lineHeight: 19 }}>
-                  Your cancellation request has been sent to the admin. You will be notified once it is processed.
-                </Text>
+                {(order as any).changeRequest ? (
+                  <>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: "#9a3412", marginBottom: 4 }}>
+                      Change Requested
+                    </Text>
+                    <Text style={{ fontSize: 13, color: "#c2410c", lineHeight: 19 }}>
+                      You requested {(order as any).changeRequest.requestedQuantity} platter{(order as any).changeRequest.requestedQuantity !== 1 ? "s" : ""}. Awaiting admin approval.
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: "#9a3412", marginBottom: 4 }}>
+                      Cancellation Requested
+                    </Text>
+                    <Text style={{ fontSize: 13, color: "#c2410c", lineHeight: 19 }}>
+                      Your cancellation request has been sent to the admin. You will be notified once it is processed.
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
           )}
@@ -477,6 +490,17 @@ export default function OrderDetailScreen() {
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                   <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant }}>TrxID</Text>
                   <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.primary }}>{order.trxId as string}</Text>
+                </View>
+              )}
+              {!!(order as any).paymentNumberSnapshot && (
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <Text style={{ fontSize: 13, color: Colors.onSurfaceVariant }}>Sent To</Text>
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.onSurface }}>
+                    {(order as any).paymentNumberSnapshot.number}{" "}
+                    <Text style={{ fontWeight: "400", color: Colors.outline }}>
+                      ({(order as any).paymentNumberSnapshot.type})
+                    </Text>
+                  </Text>
                 </View>
               )}
               {!!order.paymentScreenshot && (
@@ -546,13 +570,15 @@ export default function OrderDetailScreen() {
                 paddingTop: 20,
                 borderTopWidth: 1,
                 borderTopColor: `${Colors.outlineVariant}28`,
+                flexDirection: "row",
                 gap: 10,
               }}
             >
               <TouchableOpacity
                 onPress={() => setModalType("change")}
-                disabled={actionLoading}
+                disabled={actionLoading !== null}
                 style={{
+                  flex: 1,
                   height: 52,
                   borderRadius: 12,
                   backgroundColor: Colors.surfaceContainerHigh,
@@ -560,19 +586,23 @@ export default function OrderDetailScreen() {
                   justifyContent: "center",
                 }}
               >
-                {actionLoading ? (
+                {actionLoading === "change" ? (
                   <ActivityIndicator color={Colors.primary} />
                 ) : (
-                  <Text style={{ color: Colors.primary, fontWeight: "700", fontSize: 15 }}>
-                    Request Change
-                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Ionicons name="swap-horizontal-outline" size={18} color={Colors.primary} />
+                    <Text style={{ color: Colors.primary, fontWeight: "700", fontSize: 14 }}>
+                      Request Change
+                    </Text>
+                  </View>
                 )}
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => setModalType("cancel")}
-                disabled={actionLoading}
+                disabled={actionLoading !== null}
                 style={{
+                  flex: 1,
                   height: 52,
                   borderRadius: 12,
                   backgroundColor: `${Colors.errorContainer}60`,
@@ -580,12 +610,15 @@ export default function OrderDetailScreen() {
                   justifyContent: "center",
                 }}
               >
-                {actionLoading ? (
+                {actionLoading === "cancel" ? (
                   <ActivityIndicator color={Colors.error} />
                 ) : (
-                  <Text style={{ color: Colors.error, fontWeight: "700", fontSize: 15 }}>
-                    {order.cutOffReached ? "Request Cancellation" : "Cancel Order"}
-                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Ionicons name="close-circle-outline" size={18} color={Colors.error} />
+                    <Text style={{ color: Colors.error, fontWeight: "700", fontSize: 14 }}>
+                      {order.cutOffReached ? "Request Cancel" : "Cancel"}
+                    </Text>
+                  </View>
                 )}
               </TouchableOpacity>
             </View>
@@ -611,7 +644,7 @@ export default function OrderDetailScreen() {
       {/* Request change modal */}
       <ChangeRequestModal
         visible={modalType === "change"}
-        loading={actionLoading}
+        loading={actionLoading === "change"}
         currentQuantity={(order as any)?.quantity ?? 1}
         onConfirm={handleChangeConfirm}
         onDismiss={() => setModalType(null)}
