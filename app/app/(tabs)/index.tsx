@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
@@ -218,14 +218,18 @@ export default function HomeScreen() {
     loadMenus();
   }, [loadMenus]);
 
-  // Load unread notification count on mount
-  useEffect(() => {
+  // Reload unread count every time this screen is focused, and poll every 30s
+  const refreshUnread = useCallback(() => {
     getNotifications()
-      .then((notifs) =>
-        setUnreadCount(notifs.filter((n) => !n.read).length)
-      )
+      .then((notifs) => setUnreadCount(notifs.filter((n) => !n.read).length))
       .catch(() => {});
   }, []);
+
+  useFocusEffect(useCallback(() => {
+    refreshUnread();
+    const interval = setInterval(refreshUnread, 30_000);
+    return () => clearInterval(interval);
+  }, [refreshUnread]));
 
   // Load active location label on mount
   useEffect(() => {
@@ -294,16 +298,23 @@ export default function HomeScreen() {
               <View
                 style={{
                   position: "absolute",
-                  top: -3,
-                  right: -3,
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
+                  top: -5,
+                  right: -6,
+                  minWidth: 16,
+                  height: 16,
+                  borderRadius: 8,
                   backgroundColor: Colors.error,
                   borderWidth: 1.5,
                   borderColor: Colors.surface,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingHorizontal: 3,
                 }}
-              />
+              >
+                <Text style={{ color: "#fff", fontSize: 9, fontWeight: "800", lineHeight: 11 }}>
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Text>
+              </View>
             )}
           </TouchableOpacity>
         </View>

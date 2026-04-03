@@ -5,6 +5,7 @@ import { orders, menus, users, paymentNumbers } from "@/db/schema";
 import { v2 as cloudinary } from "cloudinary";
 import { getAuthUser } from "@/lib/auth";
 import { ok, err, unauthorized, notFound, forbidden } from "@/lib/response";
+import { notify, notifyAdmin } from "@/lib/notify";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -220,6 +221,8 @@ export async function PATCH(
           })
           .where(eq(orders.id, id))
           .returning();
+        await notify(order.userId, "cancel_requested", "Cancellation Requested", "Your cancellation request has been submitted and is pending admin review.", id);
+        await notifyAdmin("cancel_requested", "Cancellation Requested", `User ${auth.phone} requested to cancel order ${id}`, id, auth.sub);
         return ok({
           ...updated,
           message: "Cancellation request submitted for admin review",
@@ -236,6 +239,7 @@ export async function PATCH(
         })
         .where(eq(orders.id, id))
         .returning();
+      await notify(order.userId, "order_cancelled", "Order Cancelled", "Your order has been successfully cancelled.");
 
       return ok(updated);
     }
@@ -265,6 +269,8 @@ export async function PATCH(
         .where(eq(orders.id, id))
         .returning();
 
+      await notifyAdmin("change_requested", "Change Requested", `User ${auth.phone} requested a change for order ${id}`, id, auth.sub);
+ 
       return ok({
         ...updated,
         message: "Change request submitted for admin review",

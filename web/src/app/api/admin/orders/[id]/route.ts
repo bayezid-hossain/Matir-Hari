@@ -3,6 +3,7 @@ import { getAdminSessionFromRequest } from "@/lib/admin-auth";
 import { db } from "@/db";
 import { orders, users, menus } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { notify } from "@/lib/notify";
 
 export async function PATCH(
   req: NextRequest,
@@ -35,6 +36,7 @@ export async function PATCH(
         .set({ status: "Confirmed", confirmedAt: new Date(), updatedAt: new Date() })
         .where(eq(orders.id, id))
         .returning();
+      await notify(order.userId, "order_confirmed", "Payment Verified ✅", "Your payment has been verified. Your order is confirmed!", id);
       return NextResponse.json({ data: updated });
     }
 
@@ -47,6 +49,7 @@ export async function PATCH(
         .set({ status: "Cooking", cookingStartedAt: new Date(), updatedAt: new Date() })
         .where(eq(orders.id, id))
         .returning();
+      await notify(order.userId, "cooking_started", "Cooking Started 🍳", "Your meal is being slow-cooked right now. Hang tight!", id);
       return NextResponse.json({ data: updated });
     }
 
@@ -59,6 +62,7 @@ export async function PATCH(
         .set({ status: "OutForDelivery", outForDeliveryAt: new Date(), updatedAt: new Date() })
         .where(eq(orders.id, id))
         .returning();
+      await notify(order.userId, "out_for_delivery", "On the Way! 🚴", "Your order is out for delivery. Get ready!", id);
       return NextResponse.json({ data: updated });
     }
 
@@ -79,6 +83,7 @@ export async function PATCH(
           updatedAt: new Date(),
         })
         .where(eq(users.id, order.userId));
+      await notify(order.userId, "delivered", "Delivered! 🎉", "Your order has been delivered. Enjoy your meal!", id);
       return NextResponse.json({ data: updated });
     }
 
@@ -93,6 +98,7 @@ export async function PATCH(
         })
         .where(eq(orders.id, id))
         .returning();
+      await notify(order.userId, "order_cancelled", "Order Cancelled", `Your order has been cancelled. ${cancelReason ? `Reason: ${cancelReason}` : ""}`.trim(), id);
       return NextResponse.json({ data: updated });
     }
 
@@ -128,6 +134,7 @@ export async function PATCH(
         })
         .where(eq(orders.id, id))
         .returning();
+      await notify(order.userId, "change_accepted", "Change Request Accepted ✅", `Your request to change quantity to ${newQty} has been accepted.`, id);
       return NextResponse.json({ data: updated });
     }
 
@@ -146,6 +153,7 @@ export async function PATCH(
         })
         .where(eq(orders.id, id))
         .returning();
+      await notify(order.userId, "change_rejected", "Change Request Rejected", "Your change request was reviewed but could not be accepted.", id);
       return NextResponse.json({ data: updated });
     }
 

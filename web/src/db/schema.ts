@@ -39,6 +39,7 @@ export const users = pgTable("users", {
   // Stored as LocationData: { locations: SavedLocation[], activeId: string | null }
   // Legacy rows may store { address, lat, lng } — treat those as empty.
   locationData: json("location_data"),
+  expoPushToken: text("expo_push_token"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -173,6 +174,19 @@ export const notifications = pgTable("notifications", {
   read: boolean("read").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+ 
+export const adminNotifications = pgTable("admin_notifications", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  userId: text("user_id"), // The user who triggered the notification (optional)
+  type: text("type").notNull(), // "cancel_requested" | "change_requested"
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  orderId: text("order_id"),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 
 // ─── Relations ────────────────────────────────────────────────────────────────
 
@@ -204,4 +218,8 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, { fields: [notifications.userId], references: [users.id] }),
 }));
 
+export const adminNotificationsRelations = relations(adminNotifications, ({ one }) => ({
+  user: one(users, { fields: [adminNotifications.userId], references: [users.id] }),
+}));
+ 
 export const paymentNumbersRelations = relations(paymentNumbers, () => ({}));

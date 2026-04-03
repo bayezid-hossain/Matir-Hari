@@ -1,10 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { AdminSidebar } from "./AdminSidebar";
 
 export function AdminLayoutWrapper({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+ 
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch("/api/admin/notifications");
+        const json = await res.json();
+        if (json.data) {
+          const unread = json.data.filter((n: any) => !n.read).length;
+          setUnreadCount(unread);
+        }
+      } catch (e) {
+        console.error("Failed to fetch admin notifications", e);
+      }
+    };
+ 
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 15000); // 15s polling
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen flex bg-surface font-body text-on-surface">
@@ -42,10 +63,17 @@ export function AdminLayoutWrapper({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
-            <button className="w-10 h-10 flex items-center justify-center rounded-full text-primary hover:bg-surface-container-high transition-colors relative">
+            <Link 
+              href="/admin/notifications"
+              className="w-10 h-10 flex items-center justify-center rounded-full text-primary hover:bg-surface-container-high transition-colors relative"
+            >
               <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
-            </button>
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 w-4 h-4 bg-primary text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-surface">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Link>
             <button className="hidden sm:flex w-10 h-10 items-center justify-center rounded-full text-primary hover:bg-surface-container-high transition-colors">
               <span className="material-symbols-outlined">settings</span>
             </button>

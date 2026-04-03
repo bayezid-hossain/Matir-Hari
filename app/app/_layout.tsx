@@ -19,6 +19,7 @@ import {
 } from "@expo-google-fonts/be-vietnam-pro";
 import { useAuthStore } from "@/store/auth-store";
 import { GlobalAlert } from "@/components/ui/global-alert";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -46,6 +47,8 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, authLoaded]);
+ 
+  usePushNotifications();
 
   if (!fontsLoaded || !authLoaded) return null;
 

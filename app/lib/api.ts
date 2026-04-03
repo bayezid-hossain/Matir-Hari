@@ -359,3 +359,10 @@ export async function markNotificationsRead(): Promise<{ message: string }> {
     method: "PATCH",
   });
 }
+ 
+export async function registerPushToken(token: string): Promise<{ message: string }> {
+  return request("/api/users/me/push-token", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
